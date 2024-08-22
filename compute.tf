@@ -53,25 +53,6 @@ data "azurerm_image" "custom" {
 #------------------------------------------------------------------------------
 # Virtual Machine Scale Set (VMSS)
 #------------------------------------------------------------------------------
-data "cloudinit_config" "main" {
-  gzip          = false
-  base64_encode = true
-
-  part {
-    filename     = "cloud-config.yaml"
-    content_type = "text/cloud-config"
-
-    content = file("${path.module}/templates/cloud_config.yml")
-  }
-
-  part {
-    filename     = "install-vault.sh"
-    content_type = "text/x-shellscript"
-
-    content = templatefile("${path.module}/templates/custom_data.sh.tpl", local.custom_data_args)
-  }
-}
-
 resource "azurerm_linux_virtual_machine_scale_set" "vault" {
   name                = "${var.friendly_name_prefix}-vault-vmss"
   resource_group_name = local.resource_group_name
@@ -84,8 +65,13 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
   zone_balance        = true
   zones               = var.availability_zones
   # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
-  # custom_data         = base64encode(templatefile("${path.module}/templates/custom_data.sh.tpl", local.custom_data_args))
-  custom_data = data.cloudinit_config.main.rendered
+
+  custom_data = base64encode(
+    templatefile(
+      "${path.module}/templates/custom_data.sh.tpl",
+      local.custom_data_args
+    )
+  )
 
   scale_in {
     rule = "OldestVM"
