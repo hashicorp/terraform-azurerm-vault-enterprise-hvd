@@ -248,6 +248,7 @@ EOF
 }
 
 function generate_vault_systemd_unit_file {
+  local kill_cmd=$(which kill)
   sudo bash -c "cat > $SYSTEMD_DIR/vault.service" <<EOF
 [Unit]
 Description="HashiCorp Vault - A tool for managing secrets"
@@ -270,7 +271,7 @@ AmbientCapabilities=CAP_IPC_LOCK
 CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
 NoNewPrivileges=yes
 ExecStart=$VAULT_DIR_BIN/vault server -config=$VAULT_DIR_CONFIG/server.hcl
-ExecReload=/bin/kill --signal HUP \$MAINPID
+ExecReload=$${kill_cmd} --signal HUP \$MAINPID
 KillMode=process
 KillSignal=SIGINT
 Restart=on-failure
@@ -291,6 +292,27 @@ EOF
 Environment="VAULT_ENABLE_FILE_PERMISSIONS_CHECK=true"
 EOF
   chmod 0600 /etc/systemd/system/vault.service.d/override.conf
+}
+
+function generate_vault_logrotate {
+  bash -c "cat > /etc/logrotate.d/vault" <<-EOF
+  /var/log/vault/*.log {
+    daily
+    size 100M
+    rotate 32
+    dateext
+    dateformat .%Y%m%d_%H%M%S
+    missingok
+    notifempty
+    nocreate
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+      systemctl reload vault > /dev/null 2>&1 || true
+    endscript
+  }
+EOF
 }
 
 function start_enable_vault {
@@ -367,6 +389,9 @@ main() {
 
   log "INFO" "Generating Vault systemd unit file and overrides.conf"
   generate_vault_systemd_unit_file
+
+  log "INFO" "Generating audit log rotation script"
+  generate_vault_logrotate
 
   log "INFO" "Starting Vault"
   start_enable_vault
