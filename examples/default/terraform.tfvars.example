@@ -1,0 +1,32 @@
+#------------------------------------------------------------------------------
+# Common
+#------------------------------------------------------------------------------
+friendly_name_prefix  = "<example>"
+location              = "<westus3>"
+create_resource_group = true
+resource_group_name   = "<default-example>"
+vault_fqdn            = "<vault-azwestus3.domain.tld>" # Must match TLS cert SAN entry
+
+#------------------------------------------------------------------------------
+# Networking
+#------------------------------------------------------------------------------
+vnet_id         = "</subscriptions/12345678-3210-abcd-01ef-abcd5678cdef4321/resourceGroups/my-rg-name/providers/Microsoft.Network/virtualNetworks/my-vnet-name>"
+vault_subnet_id = "</subscriptions/12345678-3210-abcd-01ef-abcd5678cdef4321/resourceGroups/my-rg-name/providers/Microsoft.Network/virtualNetworks/my-vnet-name/subnets/vault-subnet-name>"
+
+#------------------------------------------------------------------------------
+# Azure Key Vault installation secrets and unseal key
+#------------------------------------------------------------------------------
+prereqs_keyvault_rg_name               = "<my-rg-name>"
+prereqs_keyvault_name                  = "<example-vault-kv>"
+vault_license_keyvault_secret_id       = "<https://example-vault-kv.vault.azure.net/secrets/license-secret-name/12341234123412341234123412341234>"
+vault_tls_cert_keyvault_secret_id      = "<https://example-vault-kv.vault.azure.net/secrets/cert-secret-name/12341234123412341234123412341234>"
+vault_tls_privkey_keyvault_secret_id   = "<https://example-vault-kv.vault.azure.net/secrets/privkey-secret-name/12341234123412341234123412341234>"
+vault_tls_ca_bundle_keyvault_secret_id = null
+
+vault_seal_azurekeyvault_vault_name      = "<example-vault-kv>"
+vault_seal_azurekeyvault_unseal_key_name = "<example-vault-unseal-key-001>"
+
+#------------------------------------------------------------------------------
+# Compute
+#------------------------------------------------------------------------------
+vm_ssh_public_key_path = "</path/to/id_rsa.pub>"
