@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 locals {
   lb_frontend_name_suffix = var.lb_is_internal == true ? "internal" : "external"
 

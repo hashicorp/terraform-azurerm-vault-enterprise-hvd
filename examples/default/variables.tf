@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 variable "friendly_name_prefix" {
   type        = string
   description = "Friendly name prefix for uniquely naming Azure resources."

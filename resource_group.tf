@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "azurerm_resource_group" "vault" {
   count = var.create_resource_group == true ? 1 : 0
 
