@@ -104,7 +104,7 @@ variable "vault_fqdn" {
 variable "vault_version" {
   type        = string
   description = "Version of Vault to install."
-  default     = "1.17.1+ent"
+  default     = "1.17.3+ent"
 }
 
 variable "vault_disable_mlock" {
