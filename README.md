@@ -1,4 +1,4 @@
-# Vault Enterprise HVD on Azure
+# Vault Enterprise HVD on Azure VM
 
 Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Vault Enterprise on Azure using Virtual Machines. This module deploys Vault Enterprise with integrated storage.
 
