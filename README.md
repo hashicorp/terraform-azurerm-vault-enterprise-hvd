@@ -1,6 +1,6 @@
 # Vault Enterprise HVD on Azure VM
 
-Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Vault Enterprise on Azure using Virtual Machines. This module deploys Vault Enterprise with integrated storage.
+Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Vault Enterprise on Microsoft Azure using Azure Virtual Machines. This module deploys Vault Enterprise with integrated storage.
 
 ![HVD Vault Architecture diagram](https://raw.githubusercontent.com/hashicorp/terraform-aws-vault-enterprise-hvd/main/docs/images/080-hvd-vault-networking-diagram.png "HVD Vault Architecture diagram")
 
@@ -30,10 +30,6 @@ This module by default deploys on Ubuntu 22.04. This can be changed by updating 
 - `var.vm_image_sku`
 - `var.vm_image_version`
 
-## TLS
-
-There is a helper doc for tls cert generation should you need it [TLS](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/tree/main/docs/docs/tls.md).
-
 ## Load Balancing
 
 This module supports the deployment of Azure's TCP Layer 4 load balancer to sit in front of the Vault cluster. The load balancer can be external (public IP) or internal (private IP) and is configured to use Vault's `sys/health` API endpoint to determine health status of Vault to ensure clients are always directed to a healthy instance when possible.
@@ -44,7 +40,15 @@ The variable `lb_is_internal` is used to dictate if the load balancer should be 
 
 This module requires auto-unseal and defaults to the Azure Key Vault seal mechanism. The module deploys both the Azure Key Vault and Key Vault Key to enable auto-unseal
 
-## Terraform configuration
+<!-- BEGIN_TF_DOCS -->
+## Module support
+
+This open source software is maintained by the HashiCorp Technical Field Organization, independently of our enterprise products. While our Support Engineering team provides dedicated support for our enterprise offerings, this open source software is not included.
+
+- For help using this open source software, please engage your account team.
+- To report bugs/issues with this open source software, please open them directly against this code repository using the GitHub issues feature.
+
+Please note that there is no official Service Level Agreement (SLA) for support of this software as a HashiCorp customer. This software falls under the definition of Community Software/Versions in your Agreement. We appreciate your understanding and collaboration in improving our open source projects.
 
 ## Requirements
 
@@ -58,10 +62,6 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 3.101 |
-
-## Modules
-
-No modules.
 
 ## Resources
 
@@ -96,7 +96,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_package_names"></a> [additional\_package\_names](#input\_additional\_package\_names) | List of additional repository package names to install | `set(string)` | `[]` | no |
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of Azure Availability Zones to spread Vault resources across. | `set(string)` | <pre>[<br>  "1",<br>  "2",<br>  "3"<br>]</pre> | no |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of Azure Availability Zones to spread Vault resources across. | `set(string)` | <pre>[<br/>  "1",<br/>  "2",<br/>  "3"<br/>]</pre> | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Map of common tags for taggable Azure resources. | `map(string)` | `{}` | no |
 | <a name="input_create_lb"></a> [create\_lb](#input\_create\_lb) | Boolean to create an Azure Load Balancer for Vault. | `bool` | `true` | no |
 | <a name="input_create_resource_group"></a> [create\_resource\_group](#input\_create\_resource\_group) | Boolean to create a new Resource Group for this Vault deployment. | `bool` | `true` | no |
@@ -141,7 +141,7 @@ No modules.
 | <a name="input_vault_tls_privkey_keyvault_secret_id"></a> [vault\_tls\_privkey\_keyvault\_secret\_id](#input\_vault\_tls\_privkey\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault TLS private key. | `string` | n/a | yes |
 | <a name="input_vault_tls_require_and_verify_client_cert"></a> [vault\_tls\_require\_and\_verify\_client\_cert](#input\_vault\_tls\_require\_and\_verify\_client\_cert) | Require and verify client certs on API requests | `bool` | `false` | no |
 | <a name="input_vault_user_name"></a> [vault\_user\_name](#input\_vault\_user\_name) | Name of system user to own Vault files and processes | `string` | `"vault"` | no |
-| <a name="input_vault_version"></a> [vault\_version](#input\_vault\_version) | Version of Vault to install. | `string` | `"1.17.1+ent"` | no |
+| <a name="input_vault_version"></a> [vault\_version](#input\_vault\_version) | Version of Vault to install. | `string` | `"1.17.3+ent"` | no |
 | <a name="input_vm_admin_username"></a> [vm\_admin\_username](#input\_vm\_admin\_username) | Admin username for VMs in VMSS. | `string` | `"ubuntu"` | no |
 | <a name="input_vm_boot_disk_size"></a> [vm\_boot\_disk\_size](#input\_vm\_boot\_disk\_size) | The disk size (GB) to use to create the boot disk | `number` | `64` | no |
 | <a name="input_vm_custom_image_name"></a> [vm\_custom\_image\_name](#input\_vm\_custom\_image\_name) | Name of custom VM image to use for VMSS. If not using a custom image, leave this set to null. | `string` | `null` | no |
@@ -168,3 +168,4 @@ No modules.
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Name of the Resource Group. |
 | <a name="output_vault_cli_config"></a> [vault\_cli\_config](#output\_vault\_cli\_config) | Environment variables to configure the Vault CLI |
 | <a name="output_vault_server_private_ips"></a> [vault\_server\_private\_ips](#output\_vault\_server\_private\_ips) | The Private IPs of the Vault servers that are spun up by VMSS |
+<!-- END_TF_DOCS -->
