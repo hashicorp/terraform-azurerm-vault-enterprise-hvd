@@ -165,14 +165,14 @@ function install_vault_plugins {
 
 function retrieve_certs_from_kv() {
   log "INFO" "Retrieving TLS certificate '${vault_tls_cert_keyvault_secret_id}' from Key Vault."
-  az keyvault secret show --id ${vault_tls_cert_keyvault_secret_id} --query value --output tsv | base64 -di > $VAULT_DIR_TLS/cert.pem && echo $'\n' >> $VAULT_DIR_TLS/cert.pem
+  az keyvault secret show --id ${vault_tls_cert_keyvault_secret_id} --query value --output tsv | base64 -d > $VAULT_DIR_TLS/cert.pem && echo $'\n' >> $VAULT_DIR_TLS/cert.pem
 
   log "INFO" "Retrieving TLS private key '${vault_tls_privkey_keyvault_secret_id}' from Key Vault."
-  az keyvault secret show --id ${vault_tls_privkey_keyvault_secret_id} --query value --output tsv | base64 -di > $VAULT_DIR_TLS/key.pem
+  az keyvault secret show --id ${vault_tls_privkey_keyvault_secret_id} --query value --output tsv | base64 -d > $VAULT_DIR_TLS/key.pem
 
 %{ if vault_tls_ca_bundle_keyvault_secret_id != "NONE" ~}
   log "INFO" "Retrieving TLS CA bundle '${vault_tls_ca_bundle_keyvault_secret_id}' from Key Vault."
-  az keyvault secret show --id ${vault_tls_ca_bundle_keyvault_secret_id} --query value --output tsv | base64 -di > $VAULT_DIR_TLS/ca.pem
+  az keyvault secret show --id ${vault_tls_ca_bundle_keyvault_secret_id} --query value --output tsv | base64 -d > $VAULT_DIR_TLS/ca.pem
 %{ endif ~}
 
   log "INFO" "Setting certificate file permissions and ownership"
@@ -240,6 +240,12 @@ api_addr      = "https://$FULL_HOSTNAME:${vault_port_api}"
 cluster_addr  = "https://$FULL_HOSTNAME:${vault_port_cluster}"
 
 plugin_directory = "$VAULT_DIR_PLUGINS"
+
+telemetry {
+  disable_hostname = true
+  prometheus_retention_time = "24h"
+}
+
 EOF
 
   log "INFO" "Setting Vault server config file permissions and ownership"
