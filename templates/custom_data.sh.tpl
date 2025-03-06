@@ -240,12 +240,6 @@ api_addr      = "https://$FULL_HOSTNAME:${vault_port_api}"
 cluster_addr  = "https://$FULL_HOSTNAME:${vault_port_cluster}"
 
 plugin_directory = "$VAULT_DIR_PLUGINS"
-
-telemetry {
-  disable_hostname = true
-  prometheus_retention_time = "24h"
-}
-
 EOF
 
   log "INFO" "Setting Vault server config file permissions and ownership"
