@@ -1,14 +1,19 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-variable "friendly_name_prefix" {
+#------------------------------------------------------------------------------
+# Common
+#------------------------------------------------------------------------------
+variable "resource_group_name" {
   type        = string
-  description = "Friendly name prefix for uniquely naming Azure resources."
+  description = "Name of Resource Group to use for Vault cluster resources"
+  default     = "vault-ent-rg"
+}
 
-  validation {
-    condition     = can(regex("^[[:alnum:]]+$", var.friendly_name_prefix)) && length(var.friendly_name_prefix) < 13
-    error_message = "Value can only contain alphanumeric characters and must be less than 13 characters."
-  }
+variable "create_resource_group" {
+  type        = bool
+  description = "Boolean to create a new Resource Group for this Vault deployment."
+  default     = true
 }
 
 variable "location" {
@@ -21,33 +26,42 @@ variable "location" {
   }
 }
 
-variable "create_resource_group" {
+variable "friendly_name_prefix" {
+  type        = string
+  description = "Friendly name prefix for uniquely naming Azure resources."
+
+  validation {
+    condition     = can(regex("^[[:alnum:]]+$", var.friendly_name_prefix)) && length(var.friendly_name_prefix) < 13
+    error_message = "Value can only contain alphanumeric characters and must be less than 13 characters."
+  }
+}
+
+variable "common_tags" {
+  type        = map(string)
+  description = "Map of common tags for taggable Azure resources."
+  default     = {}
+}
+
+variable "availability_zones" {
+  type        = set(string)
+  description = "List of Azure Availability Zones to spread Vault resources across."
+  default     = ["1", "2", "3"]
+
+  validation {
+    condition     = alltrue([for az in var.availability_zones : contains(["1", "2", "3"], az)])
+    error_message = "Availability zone must be one of, or a combination of '1', '2', '3'."
+  }
+}
+
+variable "is_govcloud_region" {
   type        = bool
-  description = "Boolean to create a new Resource Group for this Vault deployment."
-  default     = true
+  description = "Boolean indicating whether this Vault deployment is in an Azure Government Cloud region."
+  default     = false
 }
 
-variable "resource_group_name" {
-  type        = string
-  description = "Name of Resource Group to use for Vault cluster resources"
-  default     = "example-vault"
-}
-
-variable "vault_fqdn" {
-  type        = string
-  description = "Fully qualified domain name of the Vault cluster. This name __must__ match a SAN entry in the TLS server certificate."
-}
-
-variable "vnet_id" {
-  type        = string
-  description = "VNet ID where Vault resources will reside."
-}
-
-variable "vault_subnet_id" {
-  type        = string
-  description = "Subnet ID for Vault server VMs."
-}
-
+#------------------------------------------------------------------------------
+# prereqs
+#------------------------------------------------------------------------------
 variable "prereqs_keyvault_name" {
   type        = string
   description = "Name of the 'prereqs' Key Vault to use for prereqs Vault deployment."
@@ -79,6 +93,95 @@ variable "vault_tls_ca_bundle_keyvault_secret_id" {
   nullable    = true
 }
 
+#------------------------------------------------------------------------------
+# Vault configuration settings
+#------------------------------------------------------------------------------
+variable "vault_fqdn" {
+  type        = string
+  description = "Fully qualified domain name of the Vault cluster. This name __must__ match a SAN entry in the TLS server certificate."
+}
+
+variable "vault_version" {
+  type        = string
+  description = "Version of Vault to install."
+  default     = "1.17.3+ent"
+}
+
+variable "vault_disable_mlock" {
+  type        = bool
+  description = "Boolean to disable mlock. Mlock should be disabled when using Raft integrated storage."
+  default     = true
+}
+
+variable "vault_enable_ui" {
+  type        = bool
+  description = "Boolean to enable Vault's web UI"
+  default     = true
+}
+
+variable "vault_default_lease_ttl_duration" {
+  type        = string
+  description = "The default lease TTL expressed as a time duration in hours, minutes and/or seconds (e.g. `4h30m10s`)"
+  default     = "1h"
+
+  validation {
+    condition     = can(regex("^([[:digit:]]+h)*([[:digit:]]+m)*([[:digit:]]+s)*$", var.vault_default_lease_ttl_duration))
+    error_message = "Value must be a combination of hours (h), minutes (m) and/or seconds (s). e.g. `4h30m10s`"
+  }
+}
+
+variable "vault_max_lease_ttl_duration" {
+  type        = string
+  description = "The max lease TTL expressed as a time duration in hours, minutes and/or seconds (e.g. `4h30m10s`)"
+  default     = "768h"
+
+  validation {
+    condition     = can(regex("^([[:digit:]]+h)*([[:digit:]]+m)*([[:digit:]]+s)*$", var.vault_max_lease_ttl_duration))
+    error_message = "Value must be a combination of hours (h), minutes (m) and/or seconds (s). e.g. `4h30m10s`"
+  }
+}
+
+variable "vault_port_api" {
+  type        = number
+  description = "TCP port for Vault API listener"
+  default     = 8200
+}
+
+variable "vault_port_cluster" {
+  type        = number
+  description = "TCP port for Vault cluster address"
+  default     = 8201
+}
+
+variable "vault_telemetry_config" {
+  type        = map(string)
+  description = "Enable telemetry for Vault"
+  default     = null
+
+  validation {
+    condition     = var.vault_telemetry_config == null || tomap(var.vault_telemetry_config)
+    error_message = "Telemetry config must be provided as a map of key-value pairs."
+  }
+}
+
+variable "vault_tls_disable_client_certs" {
+  type        = bool
+  description = "Disable Vault UI prompt for client certificates"
+  default     = false
+}
+
+variable "vault_tls_require_and_verify_client_cert" {
+  type        = bool
+  description = "Require and verify client certs on API requests"
+  default     = false
+}
+
+variable "vault_seal_type" {
+  type        = string
+  description = ""
+  default     = "azurekeyvault"
+}
+
 variable "vault_seal_azurekeyvault_vault_name" {
   type        = string
   description = "Name of the Azure Key Vault vault holding Vault's unseal key"
@@ -91,8 +194,252 @@ variable "vault_seal_azurekeyvault_unseal_key_name" {
   nullable    = true
 }
 
-variable "vm_ssh_public_key_path" {
+#------------------------------------------------------------------------------
+# System paths and settings
+#------------------------------------------------------------------------------
+variable "additional_package_names" {
+  type        = set(string)
+  description = "List of additional repository package names to install"
+  default     = []
+}
+
+variable "systemd_dir" {
   type        = string
-  description = "File system path to the SSH public key for VMs in VMSS."
+  description = "Path to systemd directory for unit files"
+  default     = "/lib/systemd/system"
+}
+
+variable "vault_dir_bin" {
+  type        = string
+  description = "Path to install Vault Enterprise binary"
+  default     = "/usr/bin"
+}
+
+variable "vault_dir_config" {
+  type        = string
+  description = "Path to install Vault Enterprise binary"
+  default     = "/etc/vault.d"
+}
+
+variable "vault_dir_home" {
+  type        = string
+  description = "Path to hold data, plugins and license directories"
+  default     = "/opt/vault"
+}
+
+variable "vault_dir_logs" {
+  type        = string
+  description = "Path to hold Vault file audit device logs"
+  default     = "/var/log/vault"
+}
+
+variable "vault_plugin_urls" {
+  type        = list(string)
+  default     = []
+  description = "(optional list) List of Vault plugin fully qualified URLs (example [\"https://releases.hashicorp.com/terraform-provider-oraclepaas/1.5.3/terraform-provider-oraclepaas_1.5.3_linux_amd64.zip\"] for deployment to Vault plugins directory)"
+  # validation {
+  #   condition     = "is url"
+  #   error_message = "value is not url"
+  # }
+}
+
+variable "vault_user_name" {
+  type        = string
+  description = "Name of system user to own Vault files and processes"
+  default     = "vault"
+}
+
+variable "vault_group_name" {
+  type        = string
+  description = "Name of group to own Vault files and processes"
+  default     = "vault"
+}
+
+#------------------------------------------------------------------------------
+# Networking
+#------------------------------------------------------------------------------
+variable "vnet_id" {
+  type        = string
+  description = "VNet ID where Vault resources will reside."
+}
+
+variable "create_lb" {
+  type        = bool
+  description = "Boolean to create an Azure Load Balancer for Vault."
+  default     = true
+}
+
+variable "lb_subnet_id" {
+  type        = string
+  description = "Subnet ID for Azure load balancer."
+  default     = null
+}
+
+variable "lb_is_internal" {
+  type        = bool
+  description = "Boolean to create an internal or external Azure Load Balancer for Vault."
+  default     = false
+}
+
+variable "lb_private_ip" {
+  type        = string
+  description = "Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`."
+  default     = null
+}
+
+variable "vault_subnet_id" {
+  type        = string
+  description = "Subnet ID for Vault server VMs."
+}
+
+#------------------------------------------------------------------------------
+# DNS
+#------------------------------------------------------------------------------
+variable "create_vault_public_dns_record" {
+  type        = bool
+  description = "Boolean to create a DNS record for Vault in a public Azure DNS zone. `public_dns_zone_name` must also be provided when `true`."
+  default     = false
+}
+
+variable "create_vault_private_dns_record" {
+  type        = bool
+  description = "Boolean to create a DNS record for Vault in a private Azure DNS zone. `private_dns_zone_name` must also be provided when `true`."
+  default     = false
+}
+
+variable "public_dns_zone_name" {
+  type        = string
+  description = "Name of existing public Azure DNS zone to create DNS record in. Required when `create_vault_public_dns_record` is `true`."
+  default     = null
+}
+
+variable "public_dns_zone_rg" {
+  type        = string
+  description = "Name of Resource Group where `public_dns_zone_name` resides. Required when `create_vault_public_dns_record` is `true`."
+  default     = null
+}
+
+variable "private_dns_zone_name" {
+  type        = string
+  description = "Name of existing private Azure DNS zone to create DNS record in. Required when `create_vault_private_dns_record` is `true`."
+  default     = null
+}
+
+variable "private_dns_zone_rg" {
+  type        = string
+  description = "Name of Resource Group where `private_dns_zone_name` resides. Required when `create_vault_private_dns_record` is `true`."
+  default     = null
+}
+
+#------------------------------------------------------------------------------
+# Virtual Machine Scaleset (VMSS)
+#------------------------------------------------------------------------------
+variable "vmss_vm_count" {
+  type        = number
+  description = "Number of VM instances in the VMSS."
+  default     = 6
+}
+
+variable "vm_sku" {
+  type        = string
+  description = "SKU for VM size for the VMSS."
+  default     = "Standard_D2s_v5"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_]+$", var.vm_sku))
+    error_message = "Value can only contain alphanumeric characters and underscores."
+  }
+}
+
+variable "vm_admin_username" {
+  type        = string
+  description = "Admin username for VMs in VMSS."
+  default     = "ubuntu"
+}
+
+variable "vm_ssh_public_key" {
+  type        = string
+  description = "SSH public key for VMs in VMSS."
+  default     = null
+}
+
+variable "vm_custom_image_name" {
+  type        = string
+  description = "Name of custom VM image to use for VMSS. If not using a custom image, leave this set to null."
+  default     = null
+}
+
+variable "vm_custom_image_rg_name" {
+  type        = string
+  description = "Resource Group name where the custom VM image resides. Only valid if `vm_custom_image_name` is not null."
+  default     = null
+}
+
+variable "vm_image_publisher" {
+  type        = string
+  description = "Publisher of the VM image."
+  default     = "Canonical"
+}
+
+variable "vm_image_offer" {
+  type        = string
+  description = "Offer of the VM image."
+  default     = "0001-com-ubuntu-server-jammy"
+}
+
+variable "vm_image_sku" {
+  type        = string
+  description = "SKU of the VM image."
+  default     = "22_04-lts-gen2"
+}
+
+variable "vm_image_version" {
+  type        = string
+  description = "Version of the VM image."
+  default     = "latest"
+}
+
+variable "vm_disk_encryption_set_name" {
+  type        = string
+  description = "Name of the Disk Encryption Set to use for VMSS."
+  default     = null
+}
+
+variable "vm_disk_encryption_set_rg" {
+  type        = string
+  description = "Name of the Resource Group where the Disk Encryption Set to use for VMSS exists."
+  default     = null
+}
+
+variable "vm_enable_boot_diagnostics" {
+  type        = bool
+  description = "Boolean to enable boot diagnostics for VMSS."
+  default     = false
+}
+
+variable "vm_boot_disk_size" {
+  type        = number
+  description = "The disk size (GB) to use to create the boot disk"
+  default     = 64
+}
+
+variable "vm_vault_data_disk_size" {
+  type        = number
+  description = "The disk size (GB) to use to create the Vault data disk"
+  default     = 200
+}
+
+#------------------------------------------------------------------------------
+# Key Vault
+#------------------------------------------------------------------------------
+variable "key_vault_cidr_allow_list" {
+  type        = list(string)
+  description = "List of CIDR blocks to allow access to the Key Vault."
+  default     = []
+}
+
+variable "worker_msi_id" {
+  type        = string
+  description = "value of the worker MSI id"
   default     = null
 }

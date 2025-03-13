@@ -15,7 +15,7 @@ provider "azurerm" {
 }
 
 module "default_example" {
-  source = "../../"
+  source = "../.."
 
   #------------------------------------------------------------------------------
   # Common

@@ -153,6 +153,17 @@ variable "vault_port_cluster" {
   default     = 8201
 }
 
+variable "vault_telemetry_config" {
+  type        = map(string)
+  description = "Enable telemetry for Vault"
+  default     = null
+
+  validation {
+    condition     = var.vault_telemetry_config == null || tomap(var.vault_telemetry_config)
+    error_message = "Telemetry config must be provided as a map of key-value pairs."
+  }
+}
+
 variable "vault_tls_disable_client_certs" {
   type        = bool
   description = "Disable Vault UI prompt for client certificates"
