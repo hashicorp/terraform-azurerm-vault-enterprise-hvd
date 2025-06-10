@@ -241,7 +241,7 @@ cluster_addr  = "https://$FULL_HOSTNAME:${vault_port_cluster}"
 
 plugin_directory = "$VAULT_DIR_PLUGINS"
 
-%{ if vault_telemetry_config != "NONE" ~}
+%{ if length(vault_telemetry_config) > 0 ~}
 telemetry {
 %{ for key, value in vault_telemetry_config ~}
   ${key} = "${value}"
