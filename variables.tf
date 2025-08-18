@@ -194,6 +194,21 @@ variable "vault_seal_azurekeyvault_unseal_key_name" {
   nullable    = true
 }
 
+variable "vault_raft_performance_multiplier" {
+  description = "Raft performance multiplier value. Defaults to 5, which is the default Vault value."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.vault_raft_performance_multiplier >= 1 && var.vault_raft_performance_multiplier <= 10
+    error_message = "Raft performance multiplier must be an integer between 1 and 10."
+  }
+
+  validation {
+    condition     = var.vault_raft_performance_multiplier == floor(var.vault_raft_performance_multiplier)
+    error_message = "Raft performance multiplier must be an integer."
+  }
+}
 #------------------------------------------------------------------------------
 # System paths and settings
 #------------------------------------------------------------------------------

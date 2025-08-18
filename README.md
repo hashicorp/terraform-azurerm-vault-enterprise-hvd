@@ -132,6 +132,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_vault_plugin_urls"></a> [vault\_plugin\_urls](#input\_vault\_plugin\_urls) | (optional list) List of Vault plugin fully qualified URLs (example ["https://releases.hashicorp.com/terraform-provider-oraclepaas/1.5.3/terraform-provider-oraclepaas_1.5.3_linux_amd64.zip"] for deployment to Vault plugins directory) | `list(string)` | `[]` | no |
 | <a name="input_vault_port_api"></a> [vault\_port\_api](#input\_vault\_port\_api) | TCP port for Vault API listener | `number` | `8200` | no |
 | <a name="input_vault_port_cluster"></a> [vault\_port\_cluster](#input\_vault\_port\_cluster) | TCP port for Vault cluster address | `number` | `8201` | no |
+| <a name="input_vault_raft_performance_multiplier"></a> [vault\_raft\_performance\_multiplier](#input\_vault\_raft\_performance\_multiplier) | Raft performance multiplier value. Defaults to 5, which is the default Vault value. | `number` | `5` | no |
 | <a name="input_vault_seal_type"></a> [vault\_seal\_type](#input\_vault\_seal\_type) | n/a | `string` | `"azurekeyvault"` | no |
 | <a name="input_vault_telemetry_config"></a> [vault\_telemetry\_config](#input\_vault\_telemetry\_config) | Enable telemetry for Vault | `map(string)` | `null` | no |
 | <a name="input_vault_tls_disable_client_certs"></a> [vault\_tls\_disable\_client\_certs](#input\_vault\_tls\_disable\_client\_certs) | Disable Vault UI prompt for client certificates | `bool` | `false` | no |

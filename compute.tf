@@ -41,8 +41,9 @@ locals {
     vault_leader_tls_servername              = var.vault_fqdn,
     vault_seal_type                          = var.vault_seal_type,
     vault_seal_azurekeyvault_vault_name      = var.vault_seal_azurekeyvault_vault_name,
-    vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name
-    vault_plugin_urls                        = var.vault_plugin_urls
+    vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
+    vault_plugin_urls                        = var.vault_plugin_urls,
+    vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
   }
 
 }
