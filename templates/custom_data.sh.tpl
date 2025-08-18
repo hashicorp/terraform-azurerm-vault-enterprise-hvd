@@ -208,15 +208,34 @@ function checksum_verify {
 
 # install_vault_binary downloads the Vault binary and puts it in dedicated bin directory
 function install_vault_binary {
-  log "INFO" "Downloading Vault Enterprise binary"
-  sudo curl -so $VAULT_DIR_BIN/vault.zip $VAULT_INSTALL_URL
+  local OS_ARCH="$1"
 
-  log "INFO" "Unzipping Vault Enterprise binary to $VAULT_DIR_BIN"
-  sudo unzip $VAULT_DIR_BIN/vault.zip vault -d $VAULT_DIR_BIN
-  sudo unzip $VAULT_DIR_BIN/vault.zip -x vault -d $VAULT_DIR_LICENSE
+  log "INFO" "Deploying Vault Enterprise binary to $VAULT_DIR_BIN unzip and set permissions"
+  sudo unzip "$${PRODUCT}"_"$${VAULT_VERSION}"_"$${OS_ARCH}".zip  vault -d $VAULT_DIR_BIN
+  sudo unzip "$${PRODUCT}"_"$${VAULT_VERSION}"_"$${OS_ARCH}".zip -x vault -d $VAULT_DIR_LICENSE
+  sudo rm -f "$${PRODUCT}"_"$${VAULT_VERSION}"_"$${OS_ARCH}".zip
 
-  sudo rm $VAULT_DIR_BIN/vault.zip
+	log "INFO" "Deploying Vault $VAULT_DIR_BIN set permissions"
+  sudo chmod 0755 $VAULT_DIR_BIN/vault
+  sudo chown $VAULT_USER:$VAULT_GROUP $VAULT_DIR_BIN/vault
+
+  log "INFO" "Deploying Vault create symlink "
+  sudo ln -sf $VAULT_DIR_BIN/vault /usr/local/bin/vault
+
+  log "INFO" "Vault binary installed successfully at $VAULT_DIR_BIN/vault"
 }
+
+# # install_vault_binary downloads the Vault binary and puts it in dedicated bin directory
+# function install_vault_binary {
+#   log "INFO" "Downloading Vault Enterprise binary"
+#   sudo curl -so $VAULT_DIR_BIN/vault.zip $VAULT_INSTALL_URL
+
+#   log "INFO" "Unzipping Vault Enterprise binary to $VAULT_DIR_BIN"
+#   sudo unzip $VAULT_DIR_BIN/vault.zip vault -d $VAULT_DIR_BIN
+#   sudo unzip $VAULT_DIR_BIN/vault.zip -x vault -d $VAULT_DIR_LICENSE
+
+#   sudo rm $VAULT_DIR_BIN/vault.zip
+# }
 
 function install_vault_plugins {
   %{ for p in vault_plugin_urls ~}
@@ -456,7 +475,7 @@ main() {
   log "INFO" "Checksum verification completed for Vault binary."
 
   log "INFO" "Installing Vault"
-  install_vault_binary
+  install_vault_binary $OS_ARCH
 
   log "INFO" "Installing Vault plugins"
   install_vault_plugins
