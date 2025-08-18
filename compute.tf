@@ -44,15 +44,7 @@ locals {
   }
 }
 
-#------------------------------------------------------------------------------
-# Custom VM image lookup
-#------------------------------------------------------------------------------
-data "azurerm_image" "custom" {
-  count = var.vm_custom_image_name == null ? 0 : 1
 
-  name                = var.vm_custom_image_name
-  resource_group_name = var.vm_custom_image_rg_name
-}
 
 #------------------------------------------------------------------------------
 # Virtual Machine Scale Set (VMSS)
