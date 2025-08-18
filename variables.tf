@@ -363,41 +363,57 @@ variable "vm_ssh_public_key" {
   default     = null
 }
 
+variable "vm_os_image" {
+  description = "The OS image to use for the VM. Options are: redhat8, redhat9, ubuntu2204, ubuntu2404."
+  type        = string
+  default     = "redhat9"
+
+  validation {
+    condition     = contains(["redhat8", "redhat9", "ubuntu2204", "ubuntu2404"], var.vm_os_image)
+    error_message = "Value must be one of 'redhat8', 'redhat9', 'ubuntu2204', or 'ubuntu2404'."
+  }
+}
+
 variable "vm_custom_image_name" {
   type        = string
-  description = "Name of custom VM image to use for VMSS. If not using a custom image, leave this set to null."
+  description = "Name of custom VM image to use for VMSS. If not using a custom image, leave this blank."
   default     = null
 }
 
 variable "vm_custom_image_rg_name" {
   type        = string
-  description = "Resource Group name where the custom VM image resides. Only valid if `vm_custom_image_name` is not null."
+  description = "Name of Resource Group where `vm_custom_image_name` image resides. Only valid if `vm_custom_image_name` is not `null`."
   default     = null
+
+  validation {
+    condition     = var.vm_custom_image_name != null ? var.vm_custom_image_rg_name != null : true
+    error_message = "A value is required when `vm_custom_image_name` is not `null`."
+  }
 }
 
-variable "vm_image_publisher" {
-  type        = string
-  description = "Publisher of the VM image."
-  default     = "Canonical"
-}
+# variable "vm_image_publisher" {
+#   type        = string
+#   description = "Publisher of the VM image."
+#   default     = "Canonical"
+# }
 
-variable "vm_image_offer" {
-  type        = string
-  description = "Offer of the VM image."
-  default     = "0001-com-ubuntu-server-jammy"
-}
+# variable "vm_image_offer" {
+#   type        = string
+#   description = "Offer of the VM image."
+#   default     = "0001-com-ubuntu-server-jammy"
+# }
 
-variable "vm_image_sku" {
-  type        = string
-  description = "SKU of the VM image."
-  default     = "22_04-lts-gen2"
-}
+# variable "vm_image_sku" {
+#   type        = string
+#   description = "SKU of the VM image."
+#   default     = "22_04-lts-gen2"
+# }
 
-variable "vm_image_version" {
-  type        = string
-  description = "Version of the VM image."
-  default     = "latest"
-}
+# variable "vm_image_version" {
+#   type        = string
+#   description = "Version of the VM image."
+#   default     = "latest"
+# }
 
 variable "vm_disk_encryption_set_name" {
   type        = string
