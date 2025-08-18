@@ -391,29 +391,7 @@ variable "vm_custom_image_rg_name" {
   }
 }
 
-# variable "vm_image_publisher" {
-#   type        = string
-#   description = "Publisher of the VM image."
-#   default     = "Canonical"
-# }
 
-# variable "vm_image_offer" {
-#   type        = string
-#   description = "Offer of the VM image."
-#   default     = "0001-com-ubuntu-server-jammy"
-# }
-
-# variable "vm_image_sku" {
-#   type        = string
-#   description = "SKU of the VM image."
-#   default     = "22_04-lts-gen2"
-# }
-
-# variable "vm_image_version" {
-#   type        = string
-#   description = "Version of the VM image."
-#   default     = "latest"
-# }
 
 variable "vm_disk_encryption_set_name" {
   type        = string
@@ -443,6 +421,17 @@ variable "vm_vault_data_disk_size" {
   type        = number
   description = "The disk size (GB) to use to create the Vault data disk"
   default     = 200
+}
+
+variable "custom_startup_script_template" {
+  type        = string
+  description = "Name of custom startup script template file. File must exist within a directory named `./templates` within your current working directory."
+  default     = null
+
+  validation {
+    condition     = var.custom_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_startup_script_template}") : true
+    error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
+  }
 }
 
 #------------------------------------------------------------------------------

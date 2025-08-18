@@ -5,6 +5,8 @@
 # Custom Data (cloud-init) arguments
 #------------------------------------------------------------------------------
 locals {
+  custom_startup_script_template = var.custom_startup_script_template != null ? "${path.cwd}/templates/${var.custom_startup_script_template}" : "${path.module}/templates/custom_data.sh.tpl"
+
   custom_data_args = {
     # used to set azure-cli context to AzureUSGovernment
     is_govcloud_region = var.is_govcloud_region
@@ -42,6 +44,7 @@ locals {
     vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name
     vault_plugin_urls                        = var.vault_plugin_urls
   }
+
 }
 
 
@@ -62,12 +65,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
   zones               = var.availability_zones
   # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
 
-  custom_data = base64encode(
-    templatefile(
-      "${path.module}/templates/custom_data.sh.tpl",
-      local.custom_data_args
-    )
-  )
+  custom_data = base64encode(templatefile("${local.custom_startup_script_template}", local.custom_data_args))
 
   scale_in {
     rule = "OldestVM"
