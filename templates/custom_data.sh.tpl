@@ -107,8 +107,14 @@ function prepare_disk() {
   local device_label="$3"
   log "DEBUG" "prepare_disk - device_label; $${device_label}"
 
+	sleep 20
+
   local device_id=$(readlink -f /dev/disk/azure/scsi1/$${device_name})
   log "DEBUG" "prepare_disk - device_id; $${device_id}"
+	if [[ -z "$${device_id}" ]]; then
+    log "ERROR" "No disk device found attached to device $${device_name}"
+    exit_script 1
+  fi
 
   mkdir $device_mountpoint
 
