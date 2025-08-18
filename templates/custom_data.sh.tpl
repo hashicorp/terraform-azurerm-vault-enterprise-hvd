@@ -211,7 +211,7 @@ storage "raft" {
   path    = "$VAULT_DIR_DATA"
   node_id = "$NODE_NAME"
 
-	performance_multiplier = ${vault_raft_performance_multiplier}
+  performance_multiplier = ${vault_raft_performance_multiplier}
 
   autopilot_redundancy_zone = "zone-$AVAILABILITY_ZONE"
 
