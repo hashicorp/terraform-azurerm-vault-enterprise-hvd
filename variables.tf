@@ -366,7 +366,7 @@ variable "vm_ssh_public_key" {
 variable "vm_os_image" {
   description = "The OS image to use for the VM. Options are: redhat8, redhat9, ubuntu2204, ubuntu2404."
   type        = string
-  default     = "redhat9"
+  default     = "ubuntu2404"
 
   validation {
     condition     = contains(["redhat8", "redhat9", "ubuntu2204", "ubuntu2404"], var.vm_os_image)
