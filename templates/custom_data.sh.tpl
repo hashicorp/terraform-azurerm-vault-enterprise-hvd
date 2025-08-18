@@ -46,6 +46,29 @@ function determine_os_distro {
   echo "$os_distro"
 }
 
+function detect_architecture {
+  local ARCHITECTURE=""
+  local OS_ARCH_DETECTED=$(uname -m)
+
+  case "$OS_ARCH_DETECTED" in
+    "x86_64"*)
+      ARCHITECTURE="linux_amd64"
+      ;;
+    "aarch64"*)
+      ARCHITECTURE="linux_arm64"
+      ;;
+		"arm"*)
+      ARCHITECTURE="linux_arm"
+			;;
+    *)
+      log "ERROR" "Unsupported architecture detected: '$OS_ARCH_DETECTED'. "
+		  exit_script 1
+  esac
+
+  echo "$ARCHITECTURE"
+
+}
+
 function install_azcli() {
   local os_distro="$1"
 
@@ -355,6 +378,9 @@ main() {
   log "INFO" "Beginning custom_data script."
   OS_DISTRO=$(determine_os_distro)
   log "INFO" "Detected OS distro is '$OS_DISTRO'."
+
+  OS_ARCH=$(detect_architecture)
+  log "INFO" "Detected system architecture is '$OS_ARCH'."
 
   log "INFO" "Scraping VM metadata required for Vault configuration"
   scrape_vm_info
