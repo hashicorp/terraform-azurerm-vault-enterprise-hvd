@@ -231,18 +231,6 @@ function install_vault_binary {
   log "INFO" "Vault binary installed successfully at $VAULT_DIR_BIN/vault"
 }
 
-# # install_vault_binary downloads the Vault binary and puts it in dedicated bin directory
-# function install_vault_binary {
-#   log "INFO" "Downloading Vault Enterprise binary"
-#   sudo curl -so $VAULT_DIR_BIN/vault.zip $VAULT_INSTALL_URL
-
-#   log "INFO" "Unzipping Vault Enterprise binary to $VAULT_DIR_BIN"
-#   sudo unzip $VAULT_DIR_BIN/vault.zip vault -d $VAULT_DIR_BIN
-#   sudo unzip $VAULT_DIR_BIN/vault.zip -x vault -d $VAULT_DIR_LICENSE
-
-#   sudo rm $VAULT_DIR_BIN/vault.zip
-# }
-
 function install_vault_plugins {
   %{ for p in vault_plugin_urls ~}
   sudo curl -s --output-dir $VAULT_DIR_PLUGINS -O ${p}
