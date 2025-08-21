@@ -28,7 +28,6 @@ locals {
     vault_tls_ca_bundle_keyvault_secret_id = var.vault_tls_ca_bundle_keyvault_secret_id == null ? "NONE" : var.vault_tls_ca_bundle_keyvault_secret_id,
 
     # Vault settings
-    vault_install_url                        = format("https://releases.hashicorp.com/vault/%s/vault_%s_linux_amd64.zip", var.vault_version, var.vault_version),
     vault_version                            = var.vault_version,
     vault_disable_mlock                      = var.vault_disable_mlock,
     vault_enable_ui                          = var.vault_enable_ui,

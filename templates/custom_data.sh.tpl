@@ -15,7 +15,6 @@ VAULT_GROUP="${vault_group_name}"
 PRODUCT="vault"
 VAULT_VERSION="${vault_version}"
 VERSION=$VAULT_VERSION
-VAULT_INSTALL_URL="${vault_install_url}"
 REQUIRED_PACKAGES="unzip"
 ADDITIONAL_PACKAGES="${additional_package_names}"
 
