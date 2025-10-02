@@ -65,3 +65,11 @@ vm_disk_encryption_set_rg   = <"my-disk-encryption-set-resource-group-name">
 ```
 
 >📝 Note: ensure that your Key Vault that contains the key for the Disk Encryption Set has an Access Policy that allows the following key permissions: `Get`, `WrapKey`, and `UnwrapKey`.
+
+## Custom startup script
+
+While this is not recommended, this module supports the ability to use your own custom startup script to install. `var.custom_startup_script_template` # defaults to /templates/custom_data.sh.tpl
+
+- The script must exist in a folder named ./templates within your current working directory that you are running Terraform from.
+- The script must contain all of the variables (denoted by ${example-variable}) in the module-level startup script
+- *Use at your own peril*

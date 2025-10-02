@@ -159,7 +159,7 @@ variable "vault_telemetry_config" {
   default     = null
 
   validation {
-    condition     = var.vault_telemetry_config == null || tomap(var.vault_telemetry_config)
+    condition     = var.vault_telemetry_config == null || can(tomap(var.vault_telemetry_config))
     error_message = "Telemetry config must be provided as a map of key-value pairs."
   }
 }
@@ -194,6 +194,21 @@ variable "vault_seal_azurekeyvault_unseal_key_name" {
   nullable    = true
 }
 
+variable "vault_raft_performance_multiplier" {
+  description = "Raft performance multiplier value. Defaults to 5, which is the default Vault value."
+  type        = number
+  default     = 5
+
+  validation {
+    condition     = var.vault_raft_performance_multiplier >= 1 && var.vault_raft_performance_multiplier <= 10
+    error_message = "Raft performance multiplier must be an integer between 1 and 10."
+  }
+
+  validation {
+    condition     = var.vault_raft_performance_multiplier == floor(var.vault_raft_performance_multiplier)
+    error_message = "Raft performance multiplier must be an integer."
+  }
+}
 #------------------------------------------------------------------------------
 # System paths and settings
 #------------------------------------------------------------------------------
@@ -363,41 +378,35 @@ variable "vm_ssh_public_key" {
   default     = null
 }
 
+variable "vm_os_image" {
+  description = "The OS image to use for the VM. Options are: redhat8, redhat9, ubuntu2204, ubuntu2404."
+  type        = string
+  default     = "ubuntu2404"
+
+  validation {
+    condition     = contains(["redhat8", "redhat9", "ubuntu2204", "ubuntu2404"], var.vm_os_image)
+    error_message = "Value must be one of 'redhat8', 'redhat9', 'ubuntu2204', or 'ubuntu2404'."
+  }
+}
+
 variable "vm_custom_image_name" {
   type        = string
-  description = "Name of custom VM image to use for VMSS. If not using a custom image, leave this set to null."
+  description = "Name of custom VM image to use for VMSS. If not using a custom image, leave this blank."
   default     = null
 }
 
 variable "vm_custom_image_rg_name" {
   type        = string
-  description = "Resource Group name where the custom VM image resides. Only valid if `vm_custom_image_name` is not null."
+  description = "Name of Resource Group where `vm_custom_image_name` image resides. Only valid if `vm_custom_image_name` is not `null`."
   default     = null
+
+  validation {
+    condition     = var.vm_custom_image_name != null ? var.vm_custom_image_rg_name != null : true
+    error_message = "A value is required when `vm_custom_image_name` is not `null`."
+  }
 }
 
-variable "vm_image_publisher" {
-  type        = string
-  description = "Publisher of the VM image."
-  default     = "Canonical"
-}
 
-variable "vm_image_offer" {
-  type        = string
-  description = "Offer of the VM image."
-  default     = "0001-com-ubuntu-server-jammy"
-}
-
-variable "vm_image_sku" {
-  type        = string
-  description = "SKU of the VM image."
-  default     = "22_04-lts-gen2"
-}
-
-variable "vm_image_version" {
-  type        = string
-  description = "Version of the VM image."
-  default     = "latest"
-}
 
 variable "vm_disk_encryption_set_name" {
   type        = string
@@ -427,6 +436,17 @@ variable "vm_vault_data_disk_size" {
   type        = number
   description = "The disk size (GB) to use to create the Vault data disk"
   default     = 200
+}
+
+variable "custom_startup_script_template" {
+  type        = string
+  description = "Name of custom startup script template file. File must exist within a directory named `./templates` within your current working directory."
+  default     = null
+
+  validation {
+    condition     = var.custom_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_startup_script_template}") : true
+    error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
+  }
 }
 
 #------------------------------------------------------------------------------

@@ -5,6 +5,8 @@
 # Custom Data (cloud-init) arguments
 #------------------------------------------------------------------------------
 locals {
+  custom_startup_script_template = var.custom_startup_script_template != null ? "${path.cwd}/templates/${var.custom_startup_script_template}" : "${path.module}/templates/custom_data.sh.tpl"
+
   custom_data_args = {
     # used to set azure-cli context to AzureUSGovernment
     is_govcloud_region = var.is_govcloud_region
@@ -26,7 +28,7 @@ locals {
     vault_tls_ca_bundle_keyvault_secret_id = var.vault_tls_ca_bundle_keyvault_secret_id == null ? "NONE" : var.vault_tls_ca_bundle_keyvault_secret_id,
 
     # Vault settings
-    vault_install_url                        = format("https://releases.hashicorp.com/vault/%s/vault_%s_linux_amd64.zip", var.vault_version, var.vault_version),
+    vault_version                            = var.vault_version,
     vault_disable_mlock                      = var.vault_disable_mlock,
     vault_enable_ui                          = var.vault_enable_ui,
     vault_default_lease_ttl_duration         = var.vault_default_lease_ttl_duration,
@@ -39,20 +41,14 @@ locals {
     vault_leader_tls_servername              = var.vault_fqdn,
     vault_seal_type                          = var.vault_seal_type,
     vault_seal_azurekeyvault_vault_name      = var.vault_seal_azurekeyvault_vault_name,
-    vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name
-    vault_plugin_urls                        = var.vault_plugin_urls
+    vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
+    vault_plugin_urls                        = var.vault_plugin_urls,
+    vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
   }
+
 }
 
-#------------------------------------------------------------------------------
-# Custom VM image lookup
-#------------------------------------------------------------------------------
-data "azurerm_image" "custom" {
-  count = var.vm_custom_image_name == null ? 0 : 1
 
-  name                = var.vm_custom_image_name
-  resource_group_name = var.vm_custom_image_rg_name
-}
 
 #------------------------------------------------------------------------------
 # Virtual Machine Scale Set (VMSS)
@@ -70,12 +66,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
   zones               = var.availability_zones
   # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
 
-  custom_data = base64encode(
-    templatefile(
-      "${path.module}/templates/custom_data.sh.tpl",
-      local.custom_data_args
-    )
-  )
+  custom_data = base64encode(templatefile("${local.custom_startup_script_template}", local.custom_data_args))
 
   scale_in {
     rule = "OldestVM"
@@ -95,16 +86,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
     }
   }
 
-  source_image_id = var.vm_custom_image_name == null ? null : data.azurerm_image.custom[0].id
+  source_image_id = var.vm_custom_image_name != null ? data.azurerm_image.custom[0].id : null
 
   dynamic "source_image_reference" {
     for_each = var.vm_custom_image_name == null ? [true] : []
 
     content {
-      publisher = var.vm_image_publisher
-      offer     = var.vm_image_offer
-      sku       = var.vm_image_sku
-      version   = var.vm_image_version
+      publisher = local.vm_image_publisher
+      offer     = local.vm_image_offer
+      sku       = local.vm_image_sku
+      version   = data.azurerm_platform_image.latest_os_image.version
     }
   }
 
