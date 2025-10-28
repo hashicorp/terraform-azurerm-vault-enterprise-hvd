@@ -298,7 +298,7 @@ variable "lb_is_internal" {
 
 variable "lb_private_ip" {
   type        = string
-  description = "Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`."
+  description = "Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`. If not provided, a dynamic private IP will be assigned from the `lb_subnet_id` subnet."
   default     = null
 }
 
