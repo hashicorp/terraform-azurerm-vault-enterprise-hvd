@@ -346,6 +346,12 @@ variable "private_dns_zone_rg" {
   default     = null
 }
 
+variable "create_private_dns_zone_vnet_link" {
+  type        = bool
+  description = "Boolean to create a virtual network link between the private DNS zone and the VNet. Only valid when `create_vault_private_dns_record` is `true`."
+  default     = true
+}
+
 #------------------------------------------------------------------------------
 # Virtual Machine Scaleset (VMSS)
 #------------------------------------------------------------------------------
