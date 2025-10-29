@@ -11,7 +11,9 @@ This module requires the following to already be in place in Azure:
 - [An Azure Subscription](#) with the following:
   - [Virtual Network](#)
   - [NAT gateway](#)
-  - [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/)
+  - [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/) containing:
+    - [A cryptographic key](https://learn.microsoft.com/en-us/azure/key-vault/keys/about-keys) for auto-unseal
+    - The necessary secrets to deploy Vault such as the license and TLS certificates (note variables ending in `_keyvault_secret_id`)
 
 ## Deployment
 
@@ -37,7 +39,7 @@ The variable `lb_is_internal` is used to dictate if the load balancer should be 
 
 ## Key Vault
 
-This module requires auto-unseal and defaults to the Azure Key Vault seal mechanism. The module deploys both the Azure Key Vault and Key Vault Key to enable auto-unseal
+This module requires auto-unseal and defaults to the Azure Key Vault seal mechanism. As a prequisite to deployment, the module requires both the Azure Key Vault and Key Vault Key to be provisioned (see `vault_seal_azurekeyvault_vault_name` and `vault_seal_azurekeyvault_unseal_key_name` variables below).
 
 ## Terraform configuration
 
@@ -90,12 +92,12 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 |------|-------------|------|---------|:--------:|
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix for uniquely naming Azure resources. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for this Vault deployment. | `string` | n/a | yes |
-| <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the 'prereqs' Key Vault to use for prereqs Vault deployment. | `string` | n/a | yes |
+| <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the existing 'prereqs' Key Vault to use for prereqs Vault deployment, containing secrets for Vault license and TLS certs. | `string` | n/a | yes |
 | <a name="input_prereqs_keyvault_rg_name"></a> [prereqs\_keyvault\_rg\_name](#input\_prereqs\_keyvault\_rg\_name) | Name of the Resource Group where the 'prereqs' Key Vault resides. | `string` | n/a | yes |
 | <a name="input_vault_fqdn"></a> [vault\_fqdn](#input\_vault\_fqdn) | Fully qualified domain name of the Vault cluster. This name __must__ match a SAN entry in the TLS server certificate. | `string` | n/a | yes |
 | <a name="input_vault_license_keyvault_secret_id"></a> [vault\_license\_keyvault\_secret\_id](#input\_vault\_license\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault license. | `string` | n/a | yes |
-| <a name="input_vault_seal_azurekeyvault_unseal_key_name"></a> [vault\_seal\_azurekeyvault\_unseal\_key\_name](#input\_vault\_seal\_azurekeyvault\_unseal\_key\_name) | Name of the Azure Key Vault key to use for auto-unseal | `string` | n/a | yes |
-| <a name="input_vault_seal_azurekeyvault_vault_name"></a> [vault\_seal\_azurekeyvault\_vault\_name](#input\_vault\_seal\_azurekeyvault\_vault\_name) | Name of the Azure Key Vault vault holding Vault's unseal key | `string` | n/a | yes |
+| <a name="input_vault_seal_azurekeyvault_unseal_key_name"></a> [vault\_seal\_azurekeyvault\_unseal\_key\_name](#input\_vault\_seal\_azurekeyvault\_unseal\_key\_name) | Name of the existing Azure Key Vault key contained in `var.vault_seal_azurekeyvault_vault_name` to use for auto-unseal | `string` | n/a | yes |
+| <a name="input_vault_seal_azurekeyvault_vault_name"></a> [vault\_seal\_azurekeyvault\_vault\_name](#input\_vault\_seal\_azurekeyvault\_vault\_name) | Name of the existing Azure Key Vault vault holding Vault's unseal key. Can be the same as `var.prereqs_keyvault_name`. | `string` | n/a | yes |
 | <a name="input_vault_subnet_id"></a> [vault\_subnet\_id](#input\_vault\_subnet\_id) | Subnet ID for Vault server VMs. | `string` | n/a | yes |
 | <a name="input_vault_tls_ca_bundle_keyvault_secret_id"></a> [vault\_tls\_ca\_bundle\_keyvault\_secret\_id](#input\_vault\_tls\_ca\_bundle\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault TLS custom CA bundle. | `string` | n/a | yes |
 | <a name="input_vault_tls_cert_keyvault_secret_id"></a> [vault\_tls\_cert\_keyvault\_secret\_id](#input\_vault\_tls\_cert\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault TLS certificate. | `string` | n/a | yes |
