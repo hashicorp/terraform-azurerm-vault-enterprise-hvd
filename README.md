@@ -11,7 +11,9 @@ This module requires the following to already be in place in Azure:
 - [An Azure Subscription](#) with the following:
   - [Virtual Network](#)
   - [NAT gateway](#)
-  - [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/)
+  - [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/) containing:
+    - [A cryptographic key](https://learn.microsoft.com/en-us/azure/key-vault/keys/about-keys) for auto-unseal
+    - The necessary secrets to deploy Vault such as the license and TLS certificates (note variables ending in `_keyvault_secret_id`)
 
 ## Deployment
 
@@ -37,7 +39,7 @@ The variable `lb_is_internal` is used to dictate if the load balancer should be 
 
 ## Key Vault
 
-This module requires auto-unseal and defaults to the Azure Key Vault seal mechanism. The module deploys both the Azure Key Vault and Key Vault Key to enable auto-unseal
+This module requires auto-unseal and defaults to the Azure Key Vault seal mechanism. As a prequisite to deployment, the module requires both the Azure Key Vault and Key Vault Key to be provisioned (see `vault_seal_azurekeyvault_vault_name` and `vault_seal_azurekeyvault_unseal_key_name` variables below).
 
 ## Terraform configuration
 
@@ -47,13 +49,13 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 3.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 3.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.0 |
 
 ## Resources
 
@@ -90,12 +92,12 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 |------|-------------|------|---------|:--------:|
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix for uniquely naming Azure resources. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for this Vault deployment. | `string` | n/a | yes |
-| <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the 'prereqs' Key Vault to use for prereqs Vault deployment. | `string` | n/a | yes |
+| <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the existing 'prereqs' Key Vault to use for prereqs Vault deployment, containing secrets for Vault license and TLS certs. | `string` | n/a | yes |
 | <a name="input_prereqs_keyvault_rg_name"></a> [prereqs\_keyvault\_rg\_name](#input\_prereqs\_keyvault\_rg\_name) | Name of the Resource Group where the 'prereqs' Key Vault resides. | `string` | n/a | yes |
 | <a name="input_vault_fqdn"></a> [vault\_fqdn](#input\_vault\_fqdn) | Fully qualified domain name of the Vault cluster. This name __must__ match a SAN entry in the TLS server certificate. | `string` | n/a | yes |
 | <a name="input_vault_license_keyvault_secret_id"></a> [vault\_license\_keyvault\_secret\_id](#input\_vault\_license\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault license. | `string` | n/a | yes |
-| <a name="input_vault_seal_azurekeyvault_unseal_key_name"></a> [vault\_seal\_azurekeyvault\_unseal\_key\_name](#input\_vault\_seal\_azurekeyvault\_unseal\_key\_name) | Name of the Azure Key Vault key to use for auto-unseal | `string` | n/a | yes |
-| <a name="input_vault_seal_azurekeyvault_vault_name"></a> [vault\_seal\_azurekeyvault\_vault\_name](#input\_vault\_seal\_azurekeyvault\_vault\_name) | Name of the Azure Key Vault vault holding Vault's unseal key | `string` | n/a | yes |
+| <a name="input_vault_seal_azurekeyvault_unseal_key_name"></a> [vault\_seal\_azurekeyvault\_unseal\_key\_name](#input\_vault\_seal\_azurekeyvault\_unseal\_key\_name) | Name of the existing Azure Key Vault key contained in `var.vault_seal_azurekeyvault_vault_name` to use for auto-unseal | `string` | n/a | yes |
+| <a name="input_vault_seal_azurekeyvault_vault_name"></a> [vault\_seal\_azurekeyvault\_vault\_name](#input\_vault\_seal\_azurekeyvault\_vault\_name) | Name of the existing Azure Key Vault vault holding Vault's unseal key. Can be the same as `var.prereqs_keyvault_name`. | `string` | n/a | yes |
 | <a name="input_vault_subnet_id"></a> [vault\_subnet\_id](#input\_vault\_subnet\_id) | Subnet ID for Vault server VMs. | `string` | n/a | yes |
 | <a name="input_vault_tls_ca_bundle_keyvault_secret_id"></a> [vault\_tls\_ca\_bundle\_keyvault\_secret\_id](#input\_vault\_tls\_ca\_bundle\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault TLS custom CA bundle. | `string` | n/a | yes |
 | <a name="input_vault_tls_cert_keyvault_secret_id"></a> [vault\_tls\_cert\_keyvault\_secret\_id](#input\_vault\_tls\_cert\_keyvault\_secret\_id) | ID of Key Vault secret containing Vault TLS certificate. | `string` | n/a | yes |
@@ -105,6 +107,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | List of Azure Availability Zones to spread Vault resources across. | `set(string)` | <pre>[<br/>  "1",<br/>  "2",<br/>  "3"<br/>]</pre> | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Map of common tags for taggable Azure resources. | `map(string)` | `{}` | no |
 | <a name="input_create_lb"></a> [create\_lb](#input\_create\_lb) | Boolean to create an Azure Load Balancer for Vault. | `bool` | `true` | no |
+| <a name="input_create_private_dns_zone_vnet_link"></a> [create\_private\_dns\_zone\_vnet\_link](#input\_create\_private\_dns\_zone\_vnet\_link) | Boolean to create a virtual network link between the private DNS zone and the VNet. Only valid when `create_vault_private_dns_record` is `true`. | `bool` | `true` | no |
 | <a name="input_create_resource_group"></a> [create\_resource\_group](#input\_create\_resource\_group) | Boolean to create a new Resource Group for this Vault deployment. | `bool` | `true` | no |
 | <a name="input_create_vault_private_dns_record"></a> [create\_vault\_private\_dns\_record](#input\_create\_vault\_private\_dns\_record) | Boolean to create a DNS record for Vault in a private Azure DNS zone. `private_dns_zone_name` must also be provided when `true`. | `bool` | `false` | no |
 | <a name="input_create_vault_public_dns_record"></a> [create\_vault\_public\_dns\_record](#input\_create\_vault\_public\_dns\_record) | Boolean to create a DNS record for Vault in a public Azure DNS zone. `public_dns_zone_name` must also be provided when `true`. | `bool` | `false` | no |
@@ -112,7 +115,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_is_govcloud_region"></a> [is\_govcloud\_region](#input\_is\_govcloud\_region) | Boolean indicating whether this Vault deployment is in an Azure Government Cloud region. | `bool` | `false` | no |
 | <a name="input_key_vault_cidr_allow_list"></a> [key\_vault\_cidr\_allow\_list](#input\_key\_vault\_cidr\_allow\_list) | List of CIDR blocks to allow access to the Key Vault. | `list(string)` | `[]` | no |
 | <a name="input_lb_is_internal"></a> [lb\_is\_internal](#input\_lb\_is\_internal) | Boolean to create an internal or external Azure Load Balancer for Vault. | `bool` | `false` | no |
-| <a name="input_lb_private_ip"></a> [lb\_private\_ip](#input\_lb\_private\_ip) | Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`. | `string` | `null` | no |
+| <a name="input_lb_private_ip"></a> [lb\_private\_ip](#input\_lb\_private\_ip) | Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`. If not provided, a dynamic private IP will be assigned from the `lb_subnet_id` subnet. | `string` | `null` | no |
 | <a name="input_lb_subnet_id"></a> [lb\_subnet\_id](#input\_lb\_subnet\_id) | Subnet ID for Azure load balancer. | `string` | `null` | no |
 | <a name="input_private_dns_zone_name"></a> [private\_dns\_zone\_name](#input\_private\_dns\_zone\_name) | Name of existing private Azure DNS zone to create DNS record in. Required when `create_vault_private_dns_record` is `true`. | `string` | `null` | no |
 | <a name="input_private_dns_zone_rg"></a> [private\_dns\_zone\_rg](#input\_private\_dns\_zone\_rg) | Name of Resource Group where `private_dns_zone_name` resides. Required when `create_vault_private_dns_record` is `true`. | `string` | `null` | no |

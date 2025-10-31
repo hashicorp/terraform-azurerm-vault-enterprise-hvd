@@ -64,7 +64,7 @@ variable "is_govcloud_region" {
 #------------------------------------------------------------------------------
 variable "prereqs_keyvault_name" {
   type        = string
-  description = "Name of the 'prereqs' Key Vault to use for prereqs Vault deployment."
+  description = "Name of the existing 'prereqs' Key Vault to use for prereqs Vault deployment, containing secrets for Vault license and TLS certs."
 }
 
 variable "prereqs_keyvault_rg_name" {
@@ -184,13 +184,13 @@ variable "vault_seal_type" {
 
 variable "vault_seal_azurekeyvault_vault_name" {
   type        = string
-  description = "Name of the Azure Key Vault vault holding Vault's unseal key"
+  description = "Name of the existing Azure Key Vault vault holding Vault's unseal key. Can be the same as `var.prereqs_keyvault_name`."
   nullable    = true
 }
 
 variable "vault_seal_azurekeyvault_unseal_key_name" {
   type        = string
-  description = "Name of the Azure Key Vault key to use for auto-unseal"
+  description = "Name of the existing Azure Key Vault key contained in `var.vault_seal_azurekeyvault_vault_name` to use for auto-unseal"
   nullable    = true
 }
 
@@ -298,7 +298,7 @@ variable "lb_is_internal" {
 
 variable "lb_private_ip" {
   type        = string
-  description = "Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`."
+  description = "Private IP address for internal Azure Load Balancer. Only valid when `lb_is_internal` is `true`. If not provided, a dynamic private IP will be assigned from the `lb_subnet_id` subnet."
   default     = null
 }
 
@@ -344,6 +344,12 @@ variable "private_dns_zone_rg" {
   type        = string
   description = "Name of Resource Group where `private_dns_zone_name` resides. Required when `create_vault_private_dns_record` is `true`."
   default     = null
+}
+
+variable "create_private_dns_zone_vnet_link" {
+  type        = bool
+  description = "Boolean to create a virtual network link between the private DNS zone and the VNet. Only valid when `create_vault_private_dns_record` is `true`."
+  default     = true
 }
 
 #------------------------------------------------------------------------------

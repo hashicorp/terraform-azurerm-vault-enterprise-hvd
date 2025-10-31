@@ -33,12 +33,14 @@ resource "azurerm_lb" "vault" {
   sku_tier            = "Regional"
 
   frontend_ip_configuration {
-    name                          = "vault-frontend-${local.lb_frontend_name_suffix}"
-    zones                         = var.lb_is_internal == true ? var.availability_zones : null
-    public_ip_address_id          = var.lb_is_internal == false ? azurerm_public_ip.vault_lb[0].id : null
-    subnet_id                     = var.lb_is_internal == true ? var.lb_subnet_id : null
-    private_ip_address_allocation = var.lb_is_internal == true ? "Static" : null
-    private_ip_address            = var.lb_is_internal == true ? var.lb_private_ip : null
+    name                 = "vault-frontend-${local.lb_frontend_name_suffix}"
+    zones                = var.lb_is_internal == true ? var.availability_zones : null
+    public_ip_address_id = var.lb_is_internal == false ? azurerm_public_ip.vault_lb[0].id : null
+    subnet_id            = var.lb_is_internal == true ? var.lb_subnet_id : null
+    private_ip_address_allocation = (var.lb_is_internal == true ?
+      (var.lb_private_ip != null ? "Static" : "Dynamic") :
+    null)
+    private_ip_address = var.lb_is_internal == true && var.lb_private_ip != null ? var.lb_private_ip : null
   }
 
   tags = merge(

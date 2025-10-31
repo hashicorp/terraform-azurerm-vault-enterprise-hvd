@@ -45,7 +45,7 @@ resource "azurerm_private_dns_a_record" "vault" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "vault" {
-  count = var.create_vault_private_dns_record == true && var.private_dns_zone_name != null ? 1 : 0
+  count = var.create_vault_private_dns_record == true && var.private_dns_zone_name != null && var.create_private_dns_zone_vnet_link ? 1 : 0
 
   name                  = "${var.friendly_name_prefix}-vault-priv-dns-zone-vnet-link"
   resource_group_name   = var.private_dns_zone_rg
