@@ -44,7 +44,9 @@ locals {
     vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
     vault_plugin_urls                        = var.vault_plugin_urls,
     vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
-    friendly_name_prefix                     = var.friendly_name_prefix
+    # Used for tagging VMs for auto-join
+    friendly_name_prefix = var.friendly_name_prefix
+    vm_domain_suffix     = var.vm_domain_suffix != null ? var.vm_domain_suffix : "NONE"
   }
 }
 

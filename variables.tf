@@ -418,6 +418,11 @@ variable "vm_custom_image_rg_name" {
   }
 }
 
+variable "vm_domain_suffix" {
+  type        = string
+  description = "Domain suffix to append to VM hostnames. If not provided, VMs will use default Azure domain. This is important for cross-VNET hostname resolution for replication. Reference https://learn.microsoft.com/en-us/azure/dns/dns-faq-private#will-the-dns-suffix-on-virtual-machines-within-a-linked-virtual-network-be-changed-to-that-of-the-private-zone- "
+  default     = null
+}
 
 
 variable "vm_disk_encryption_set_name" {
