@@ -352,6 +352,12 @@ variable "create_private_dns_zone_vnet_link" {
   default     = true
 }
 
+variable "create_private_dns_zone_vnet_link_autoregistration" {
+  type        = bool
+  description = "Boolean to enable autoregistration on  virtual network link between the private DNS zone and the VNet."
+  default     = false
+}
+
 #------------------------------------------------------------------------------
 # Virtual Machine Scaleset (VMSS)
 #------------------------------------------------------------------------------

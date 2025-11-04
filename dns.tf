@@ -51,5 +51,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vault" {
   resource_group_name   = var.private_dns_zone_rg
   private_dns_zone_name = data.azurerm_private_dns_zone.vault[0].name
   virtual_network_id    = var.vnet_id
+  registration_enabled  = var.create_private_dns_zone_vnet_link_autoregistration
   tags                  = var.common_tags
 }
