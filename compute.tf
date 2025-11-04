@@ -255,6 +255,7 @@ resource "azurerm_managed_disk" "vault_data" {
   storage_account_type = "Premium_LRS"
   create_option        = "Empty"
   disk_size_gb         = var.vm_vault_data_disk_size
+  zone                 = element(tolist(var.availability_zones), count.index)
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vault_data_attachment" {
