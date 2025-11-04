@@ -174,6 +174,11 @@ resource "azurerm_network_interface" "vault_nic" {
     #   azurerm_lb_backend_address_pool.vault_servers[0].id,
     # ]
   }
+  tags = merge(
+    # CRITICAL - this tag is critical for the auto-join feature to work
+    { "VaultCluster" = var.friendly_name_prefix },
+    var.common_tags
+  )
 }
 
 resource "azurerm_lb_backend_address_pool_address" "vault_pool_address" {
@@ -258,6 +263,8 @@ resource "azurerm_managed_disk" "vault_data" {
   create_option        = "Empty"
   disk_size_gb         = var.vm_vault_data_disk_size
   zone                 = element(tolist(var.availability_zones), count.index)
+
+  tags = var.common_tags
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "vault_data_attachment" {
