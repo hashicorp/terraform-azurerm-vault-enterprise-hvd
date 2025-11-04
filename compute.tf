@@ -44,33 +44,158 @@ locals {
     vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
     vault_plugin_urls                        = var.vault_plugin_urls,
     vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
+    friendly_name_prefix                     = var.friendly_name_prefix
   }
+}
 
+# #------------------------------------------------------------------------------
+# # Virtual Machine Scale Set (VMSS)
+# #------------------------------------------------------------------------------
+# resource "azurerm_linux_virtual_machine_scale_set" "vault" {
+#   name                = "${var.friendly_name_prefix}-vault-vmss"
+#   resource_group_name = local.resource_group_name
+#   location            = var.location
+#   instances           = var.vmss_vm_count
+#   sku                 = var.vm_sku
+#   admin_username      = var.vm_admin_username
+#   overprovision       = false
+#   upgrade_mode        = "Manual"
+#   zone_balance        = true
+#   zones               = var.availability_zones
+#   # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
+
+#   custom_data = base64encode(templatefile("${local.custom_startup_script_template}", local.custom_data_args))
+
+#   scale_in {
+#     rule = "OldestVM"
+#   }
+
+#   identity {
+#     type         = "UserAssigned"
+#     identity_ids = [azurerm_user_assigned_identity.vault.id]
+#   }
+
+#   dynamic "admin_ssh_key" {
+#     for_each = var.vm_ssh_public_key != null ? [1] : []
+
+#     content {
+#       username   = var.vm_admin_username
+#       public_key = var.vm_ssh_public_key
+#     }
+#   }
+
+#   source_image_id = var.vm_custom_image_name != null ? data.azurerm_image.custom[0].id : null
+
+#   dynamic "source_image_reference" {
+#     for_each = var.vm_custom_image_name == null ? [true] : []
+
+#     content {
+#       publisher = local.vm_image_publisher
+#       offer     = local.vm_image_offer
+#       sku       = local.vm_image_sku
+#       version   = data.azurerm_platform_image.latest_os_image.version
+#     }
+#   }
+
+#   network_interface {
+#     name    = "vault-vm-nic"
+#     primary = true
+
+#     ip_configuration {
+#       name      = "internal"
+#       primary   = true
+#       subnet_id = var.vault_subnet_id
+#       load_balancer_backend_address_pool_ids = [
+#         azurerm_lb_backend_address_pool.vault_servers[0].id,
+#         # azurerm_lb_backend_address_pool.vault_servers_443[0].id,
+#       ]
+#     }
+#   }
+
+#   os_disk {
+#     caching                = "ReadWrite"
+#     storage_account_type   = "Premium_LRS"
+#     disk_size_gb           = var.vm_boot_disk_size
+#     disk_encryption_set_id = var.vm_disk_encryption_set_name != null && var.vm_disk_encryption_set_rg != null ? data.azurerm_disk_encryption_set.vmss[0].id : null
+#   }
+
+#   data_disk {
+#     lun                  = 0
+#     caching              = "ReadWrite"
+#     storage_account_type = "Premium_LRS"
+#     disk_size_gb         = var.vm_vault_data_disk_size
+#   }
+
+#   # automatic_instance_repair {
+#   #   enabled      = true
+#   #   grace_period = "PT15M"
+#   # }
+
+#   dynamic "boot_diagnostics" {
+#     for_each = var.vm_enable_boot_diagnostics == true ? [1] : []
+#     content {}
+#   }
+
+#   tags = merge(
+#     { "Name" = "${var.friendly_name_prefix}-vault-vmss" },
+#     var.common_tags
+#   )
+# }
+
+# data "azurerm_virtual_machine_scale_set" "vault" {
+#   name                = azurerm_linux_virtual_machine_scale_set.vault.name
+#   resource_group_name = local.resource_group_name
+# }
+
+#------------------------------------------------------------------------------
+# Debug rendered Vault custom_data script from template
+#------------------------------------------------------------------------------
+# resource "local_file" "debug_custom_data" {
+#   content  = templatefile("${path.module}/templates/custom_data.sh.tpl", local.custom_data_args)
+#   filename = "${path.module}/debug/debug_custom_data.sh"
+# }
+
+
+## MANUAL VMs (experimental)
+resource "azurerm_network_interface" "vault_nic" {
+  count               = var.vmss_vm_count
+  resource_group_name = local.resource_group_name
+  location            = var.location
+  name                = "vault-vm-nic-${count.index}"
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = var.vault_subnet_id
+    private_ip_address_allocation = "Dynamic"
+    # TODO: this vv
+    # load_balancer_backend_address_pool_ids = [
+    #   azurerm_lb_backend_address_pool.vault_servers[0].id,
+    # ]
+  }
+}
+
+resource "azurerm_lb_backend_address_pool_address" "vault_pool_address" {
+  count                   = var.create_lb == true ? var.vmss_vm_count : 0
+  name                    = "vault-lb-backend-${count.index}"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.vault_servers[0].id
+  virtual_network_id      = var.vnet_id
+  ip_address              = azurerm_network_interface.vault_nic[count.index].private_ip_address
 }
 
 
-
-#------------------------------------------------------------------------------
-# Virtual Machine Scale Set (VMSS)
-#------------------------------------------------------------------------------
-resource "azurerm_linux_virtual_machine_scale_set" "vault" {
-  name                = "${var.friendly_name_prefix}-vault-vmss"
+resource "azurerm_linux_virtual_machine" "vault_vm" {
+  count               = var.vmss_vm_count
+  name                = "${var.friendly_name_prefix}-vault-${count.index}"
   resource_group_name = local.resource_group_name
   location            = var.location
-  instances           = var.vmss_vm_count
-  sku                 = var.vm_sku
-  admin_username      = var.vm_admin_username
-  overprovision       = false
-  upgrade_mode        = "Manual"
-  zone_balance        = true
-  zones               = var.availability_zones
+
+  size           = var.vm_sku
+  admin_username = var.vm_admin_username
+
+  zone = element(tolist(var.availability_zones), count.index)
   # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
 
   custom_data = base64encode(templatefile("${local.custom_startup_script_template}", local.custom_data_args))
-
-  scale_in {
-    rule = "OldestVM"
-  }
 
   identity {
     type         = "UserAssigned"
@@ -99,20 +224,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
     }
   }
 
-  network_interface {
-    name    = "vault-vm-nic"
-    primary = true
-
-    ip_configuration {
-      name      = "internal"
-      primary   = true
-      subnet_id = var.vault_subnet_id
-      load_balancer_backend_address_pool_ids = [
-        azurerm_lb_backend_address_pool.vault_servers[0].id,
-        # azurerm_lb_backend_address_pool.vault_servers_443[0].id,
-      ]
-    }
-  }
+  network_interface_ids = [
+    azurerm_network_interface.vault_nic[count.index].id,
+  ]
 
   os_disk {
     caching                = "ReadWrite"
@@ -121,38 +235,32 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
     disk_encryption_set_id = var.vm_disk_encryption_set_name != null && var.vm_disk_encryption_set_rg != null ? data.azurerm_disk_encryption_set.vmss[0].id : null
   }
 
-  data_disk {
-    lun                  = 0
-    caching              = "ReadWrite"
-    storage_account_type = "Premium_LRS"
-    disk_size_gb         = var.vm_vault_data_disk_size
-  }
-
-  # automatic_instance_repair {
-  #   enabled      = true
-  #   grace_period = "PT15M"
-  # }
-
   dynamic "boot_diagnostics" {
     for_each = var.vm_enable_boot_diagnostics == true ? [1] : []
     content {}
   }
 
   tags = merge(
-    { "Name" = "${var.friendly_name_prefix}-vault-vmss" },
+    { "Name" = "${var.friendly_name_prefix}-vault-${count.index}" },
+    { "VaultCluster" = var.friendly_name_prefix },
     var.common_tags
   )
 }
 
-data "azurerm_virtual_machine_scale_set" "vault" {
-  name                = azurerm_linux_virtual_machine_scale_set.vault.name
-  resource_group_name = local.resource_group_name
+resource "azurerm_managed_disk" "vault_data" {
+  count                = var.vmss_vm_count
+  name                 = "${var.friendly_name_prefix}-vault-data-disk-${count.index}"
+  location             = var.location
+  resource_group_name  = local.resource_group_name
+  storage_account_type = "Premium_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = var.vm_vault_data_disk_size
 }
 
-#------------------------------------------------------------------------------
-# Debug rendered Vault custom_data script from template
-#------------------------------------------------------------------------------
-# resource "local_file" "debug_custom_data" {
-#   content  = templatefile("${path.module}/templates/custom_data.sh.tpl", local.custom_data_args)
-#   filename = "${path.module}/debug/debug_custom_data.sh"
-# }
+resource "azurerm_virtual_machine_data_disk_attachment" "vault_data_attachment" {
+  count              = var.vmss_vm_count
+  managed_disk_id    = azurerm_managed_disk.vault_data[count.index].id
+  virtual_machine_id = azurerm_linux_virtual_machine.vault_vm[count.index].id
+  lun                = "0"
+  caching            = "ReadWrite"
+}
