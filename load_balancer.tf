@@ -70,7 +70,7 @@ resource "azurerm_lb_probe" "vault" {
   loadbalancer_id     = azurerm_lb.vault[0].id
   protocol            = "Https"
   port                = 8200
-  request_path        = "/v1/sys/health?perfstandbyok=1&uninitcode=200"
+  request_path        = "/v1/sys/health?perfstandbyok=1&uninitcode=200&drsecondarycode=200"
   interval_in_seconds = 15
 }
 
