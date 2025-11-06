@@ -152,10 +152,10 @@ locals {
 #------------------------------------------------------------------------------
 # Debug rendered Vault custom_data script from template
 #------------------------------------------------------------------------------
-# resource "local_file" "debug_custom_data" {
-#   content  = templatefile("${path.module}/templates/custom_data.sh.tpl", local.custom_data_args)
-#   filename = "${path.module}/debug/debug_custom_data.sh"
-# }
+resource "local_file" "debug_custom_data" {
+  content  = templatefile("${local.custom_startup_script_template}", local.custom_data_args)
+  filename = "${path.module}/debug/debug_custom_data.sh"
+}
 
 
 ## MANUAL VMs (experimental)
