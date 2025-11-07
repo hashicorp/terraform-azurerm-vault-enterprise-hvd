@@ -152,10 +152,10 @@ locals {
 #------------------------------------------------------------------------------
 # Debug rendered Vault custom_data script from template
 #------------------------------------------------------------------------------
-resource "local_file" "debug_custom_data" {
-  content  = templatefile("${local.custom_startup_script_template}", local.custom_data_args)
-  filename = "${path.module}/debug/debug_custom_data.sh"
-}
+# resource "local_file" "debug_custom_data" {
+#   content  = templatefile("${local.custom_startup_script_template}", local.custom_data_args)
+#   filename = "${path.module}/debug/debug_custom_data.sh"
+# }
 
 
 ## MANUAL VMs (experimental)
@@ -163,7 +163,7 @@ resource "azurerm_network_interface" "vault_nic" {
   count               = var.vmss_vm_count
   resource_group_name = local.resource_group_name
   location            = var.location
-  name                = "vault-vm-nic-${count.index}"
+  name                = "${var.friendly_name_prefix}-vault-vm-nic-${count.index}"
 
   ip_configuration {
     name                          = "internal"
@@ -183,7 +183,7 @@ resource "azurerm_network_interface" "vault_nic" {
 
 resource "azurerm_lb_backend_address_pool_address" "vault_pool_address" {
   count                   = var.create_lb == true ? var.vmss_vm_count : 0
-  name                    = "vault-lb-backend-${count.index}"
+  name                    = "${var.friendly_name_prefix}-vault-lb-backend-${count.index}"
   backend_address_pool_id = azurerm_lb_backend_address_pool.vault_servers[0].id
   virtual_network_id      = var.vnet_id
   ip_address              = azurerm_network_interface.vault_nic[count.index].private_ip_address
