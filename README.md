@@ -21,7 +21,7 @@ Upon first deployment, Vault servers will auto-join and form a fresh cluster. Th
 
 ## Examples
 
-Example deployment scenarios can be found in the `examples` directory of this repo [here](examples/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
+Example deployment scenarios can be found in the `examples` directory of this repo [here](examples/default/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
 
 ## Deployment Options
 
