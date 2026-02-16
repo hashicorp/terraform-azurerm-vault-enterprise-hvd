@@ -418,8 +418,6 @@ variable "vm_custom_image_rg_name" {
   }
 }
 
-
-
 variable "vm_disk_encryption_set_name" {
   type        = string
   description = "Name of the Disk Encryption Set to use for VMSS."
@@ -459,6 +457,12 @@ variable "custom_startup_script_template" {
     condition     = var.custom_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_startup_script_template}") : true
     error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
   }
+}
+
+variable "vm_domain_suffix" {
+  type        = string
+  description = "Domain suffix to append to VM hostnames. If not provided, VMs will use default Azure domain. This is required for cross-VNET hostname resolution for replication."
+  default     = null
 }
 
 #------------------------------------------------------------------------------

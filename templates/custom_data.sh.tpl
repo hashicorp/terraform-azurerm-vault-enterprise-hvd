@@ -12,6 +12,7 @@ VAULT_DIR_LOGS="${vault_dir_logs}"
 VAULT_DIR_BIN="${vault_dir_bin}"
 VAULT_USER="${vault_user_name}"
 VAULT_GROUP="${vault_group_name}"
+VM_DOMAIN_SUFFIX="${vm_domain_suffix}"
 PRODUCT="vault"
 VAULT_VERSION="${vault_version}"
 VERSION=$VAULT_VERSION
@@ -266,7 +267,11 @@ function retrieve_license_from_kv() {
 }
 
 function generate_vault_config {
-  FULL_HOSTNAME="$(hostname -f)"
+  if [[ "$VM_DOMAIN_SUFFIX" == "NONE" ]]; then
+    FULL_HOSTNAME="$(hostname -f)"
+  else
+    FULL_HOSTNAME="$(hostname -s).$VM_DOMAIN_SUFFIX"
+  fi
 
   sudo bash -c "cat > $VAULT_DIR_CONFIG/server.hcl" <<EOF
 disable_mlock = ${vault_disable_mlock}
