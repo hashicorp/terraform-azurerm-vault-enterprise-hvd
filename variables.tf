@@ -354,7 +354,7 @@ variable "create_private_dns_zone_vnet_link" {
 
 variable "create_private_dns_zone_vnet_link_autoregistration" {
   type        = bool
-  description = "Boolean to enable autoregistration on  virtual network link between the private DNS zone and the VNet."
+  description = "Boolean to enable autoregistration on virtual network link between the private DNS zone and the VNet."
   default     = false
 }
 
