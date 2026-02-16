@@ -407,6 +407,16 @@ function generate_vault_logrotate {
 EOF
 }
 
+function configure_firewalld {
+  if systemctl is-active --quiet firewalld; then
+    log "INFO" "firewalld is running. Opening Vault ports ${vault_port_api}/tcp and ${vault_port_cluster}/tcp."
+    firewall-cmd --permanent --add-port={${vault_port_api},${vault_port_cluster}}/tcp
+    firewall-cmd --reload
+  else
+    log "INFO" "firewalld is not running. Skipping firewall configuration."
+  fi
+}
+
 function start_enable_vault {
   sudo systemctl daemon-reload
   sudo systemctl enable vault
@@ -490,6 +500,9 @@ main() {
 
   log "INFO" "Generating audit log rotation script"
   generate_vault_logrotate
+
+  log "INFO" "Configuring firewalld for Vault ports"
+  configure_firewalld
 
   log "INFO" "Starting Vault"
   start_enable_vault
