@@ -461,8 +461,13 @@ variable "custom_startup_script_template" {
 
 variable "vm_domain_suffix" {
   type        = string
-  description = "Domain suffix to append to VM hostnames. If not provided, VMs will use default Azure domain. This is required for cross-VNET hostname resolution for replication."
+  description = "Domain suffix to append to VM hostnames, without a leading dot (for example, \"example.com\"). If not provided, VMs will use the default Azure domain. This is required for cross-VNET hostname resolution for replication."
   default     = null
+
+  validation {
+    condition     = var.vm_domain_suffix == null || can(regex("^[^.].*$", var.vm_domain_suffix))
+    error_message = "vm_domain_suffix must not start with a dot. Provide values like \"example.com\", not \".example.com\"."
+  }
 }
 
 #------------------------------------------------------------------------------
