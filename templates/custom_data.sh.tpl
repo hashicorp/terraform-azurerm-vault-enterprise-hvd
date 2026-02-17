@@ -378,16 +378,16 @@ EOF
 
   sudo chmod 644 $SYSTEMD_DIR/vault.service
 
-  mkdir /etc/systemd/system/vault.service.d
-  bash -c "cat > /etc/systemd/system/vault.service.d/override.conf" <<EOF
+  sudo mkdir /etc/systemd/system/vault.service.d
+  sudo bash -c "cat > /etc/systemd/system/vault.service.d/override.conf" <<EOF
 [Service]
 Environment="VAULT_ENABLE_FILE_PERMISSIONS_CHECK=true"
 EOF
-  chmod 0600 /etc/systemd/system/vault.service.d/override.conf
+  sudo chmod 0600 /etc/systemd/system/vault.service.d/override.conf
 }
 
 function generate_vault_logrotate {
-  bash -c "cat > /etc/logrotate.d/vault" <<-EOF
+  sudo bash -c "cat > /etc/logrotate.d/vault" <<-EOF
   /var/log/vault/*.log {
     daily
     size 100M
@@ -408,10 +408,10 @@ EOF
 }
 
 function configure_firewalld {
-  if systemctl is-active --quiet firewalld; then
+  if sudo systemctl is-active --quiet firewalld; then
     log "INFO" "firewalld is running. Opening Vault ports ${vault_port_api}/tcp and ${vault_port_cluster}/tcp."
-    firewall-cmd --permanent --add-port={${vault_port_api},${vault_port_cluster}}/tcp
-    firewall-cmd --reload
+    sudo firewall-cmd --permanent --add-port={${vault_port_api},${vault_port_cluster}}/tcp
+    sudo firewall-cmd --reload
   else
     log "INFO" "firewalld is not running. Skipping firewall configuration."
   fi
