@@ -409,9 +409,15 @@ EOF
 
 function configure_firewalld {
   if sudo systemctl is-active --quiet firewalld; then
+    STATE=$(sudo firewall-cmd --state)
+    log "DEBUG" "firewalld state is '$STATE'."
+
     log "INFO" "firewalld is running. Opening Vault ports ${vault_port_api}/tcp and ${vault_port_cluster}/tcp."
     sudo firewall-cmd --permanent --add-port={${vault_port_api},${vault_port_cluster}}/tcp
+    log "DEBUG" "ran add-port command for firewalld"
+
     sudo firewall-cmd --reload
+    log "DEBUG" "ran reload command for firewalld"
   else
     log "INFO" "firewalld is not running. Skipping firewall configuration."
   fi
