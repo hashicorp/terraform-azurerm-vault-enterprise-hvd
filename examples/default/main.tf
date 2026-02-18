@@ -48,7 +48,7 @@ module "default_example" {
   #------------------------------------------------------------------------------
   # Compute
   #------------------------------------------------------------------------------
-  vm_ssh_public_key = file(var.vm_ssh_public_key_path)
+  vm_ssh_public_key = var.vm_ssh_public_key
   vmss_vm_count     = 3
   vm_sku            = "Standard_D2s_v5"
 }
