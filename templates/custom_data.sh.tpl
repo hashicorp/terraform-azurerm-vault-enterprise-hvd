@@ -12,6 +12,7 @@ VAULT_DIR_LOGS="${vault_dir_logs}"
 VAULT_DIR_BIN="${vault_dir_bin}"
 VAULT_USER="${vault_user_name}"
 VAULT_GROUP="${vault_group_name}"
+VM_DOMAIN_SUFFIX="${vm_domain_suffix}"
 PRODUCT="vault"
 VAULT_VERSION="${vault_version}"
 VERSION=$VAULT_VERSION
@@ -266,7 +267,11 @@ function retrieve_license_from_kv() {
 }
 
 function generate_vault_config {
-  FULL_HOSTNAME="$(hostname -f)"
+  if [[ "$VM_DOMAIN_SUFFIX" == "NONE" ]]; then
+    FULL_HOSTNAME="$(hostname -f)"
+  else
+    FULL_HOSTNAME="$(hostname -s).$VM_DOMAIN_SUFFIX"
+  fi
 
   sudo bash -c "cat > $VAULT_DIR_CONFIG/server.hcl" <<EOF
 disable_mlock = ${vault_disable_mlock}
@@ -373,16 +378,16 @@ EOF
 
   sudo chmod 644 $SYSTEMD_DIR/vault.service
 
-  mkdir /etc/systemd/system/vault.service.d
-  bash -c "cat > /etc/systemd/system/vault.service.d/override.conf" <<EOF
+  sudo mkdir /etc/systemd/system/vault.service.d
+  sudo bash -c "cat > /etc/systemd/system/vault.service.d/override.conf" <<EOF
 [Service]
 Environment="VAULT_ENABLE_FILE_PERMISSIONS_CHECK=true"
 EOF
-  chmod 0600 /etc/systemd/system/vault.service.d/override.conf
+  sudo chmod 0600 /etc/systemd/system/vault.service.d/override.conf
 }
 
 function generate_vault_logrotate {
-  bash -c "cat > /etc/logrotate.d/vault" <<-EOF
+  sudo bash -c "cat > /etc/logrotate.d/vault" <<-EOF
   /var/log/vault/*.log {
     daily
     size 100M
@@ -400,6 +405,22 @@ function generate_vault_logrotate {
     endscript
   }
 EOF
+}
+
+function configure_firewalld {
+  if sudo systemctl is-active --quiet firewalld; then
+    log "INFO" "firewalld is running. Opening Vault ports ${vault_port_api}/tcp and ${vault_port_cluster}/tcp via firewall-offline-cmd."
+    # Use firewall-offline-cmd to avoid D-Bus deadlock in cloud-init context.
+    # firewall-cmd hangs when called from cloud-init due to D-Bus communication
+    # issues with the firewalld daemon, but offline-cmd edits the config files directly.
+    sudo firewall-offline-cmd --add-port=${vault_port_api}/tcp
+    sudo firewall-offline-cmd --add-port=${vault_port_cluster}/tcp
+    log "DEBUG" "Reloading firewalld to apply changes."
+    sudo systemctl reload firewalld
+    log "DEBUG" "firewalld configuration complete."
+  else
+    log "INFO" "firewalld is not running. Skipping firewall configuration."
+  fi
 }
 
 function start_enable_vault {
@@ -485,6 +506,9 @@ main() {
 
   log "INFO" "Generating audit log rotation script"
   generate_vault_logrotate
+
+  log "INFO" "Configuring firewalld for Vault ports"
+  configure_firewalld
 
   log "INFO" "Starting Vault"
   start_enable_vault

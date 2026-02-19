@@ -352,6 +352,12 @@ variable "create_private_dns_zone_vnet_link" {
   default     = true
 }
 
+variable "create_private_dns_zone_vnet_link_autoregistration" {
+  type        = bool
+  description = "Boolean to enable autoregistration on virtual network link between the private DNS zone and the VNet."
+  default     = false
+}
+
 #------------------------------------------------------------------------------
 # Virtual Machine Scaleset (VMSS)
 #------------------------------------------------------------------------------
@@ -412,8 +418,6 @@ variable "vm_custom_image_rg_name" {
   }
 }
 
-
-
 variable "vm_disk_encryption_set_name" {
   type        = string
   description = "Name of the Disk Encryption Set to use for VMSS."
@@ -452,6 +456,17 @@ variable "custom_startup_script_template" {
   validation {
     condition     = var.custom_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_startup_script_template}") : true
     error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
+  }
+}
+
+variable "vm_domain_suffix" {
+  type        = string
+  description = "Domain suffix to append to VM hostnames, without a leading dot (for example, \"example.com\"). If not provided, VMs will use the default Azure domain. This is required for cross-VNET hostname resolution for replication."
+  default     = null
+
+  validation {
+    condition     = var.vm_domain_suffix == null || can(regex("^[^.].*$", var.vm_domain_suffix))
+    error_message = "vm_domain_suffix must not start with a dot. Provide values like \"example.com\", not \".example.com\"."
   }
 }
 

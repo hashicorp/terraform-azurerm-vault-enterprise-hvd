@@ -29,4 +29,4 @@ vault_seal_azurekeyvault_unseal_key_name = "<example-vault-unseal-key-001>"
 #------------------------------------------------------------------------------
 # Compute
 #------------------------------------------------------------------------------
-vm_ssh_public_key_path = "</path/to/id_rsa.pub>"
+vm_ssh_public_key = "ssh-rsa AAAA......"
