@@ -31,6 +31,10 @@ see [Deployment customizations](./docs/deployment-customizations.md)
 
 There is a helper doc for tls cert generation should you need it [TLS](./docs/tls.md).
 
+## Replication
+
+For cross-cluster disaster recovery or performance replication requirements, see [Replication](./docs/replication.md).
+
 ## Load Balancing
 
 This module supports the deployment of Azure's TCP Layer 4 load balancer to sit in front of the Vault cluster. The load balancer can be external (public IP) or internal (private IP) and is configured to use Vault's `sys/health` API endpoint to determine health status of Vault to ensure clients are always directed to a healthy instance when possible.
