@@ -48,7 +48,8 @@ module "default_example" {
   #------------------------------------------------------------------------------
   # Compute
   #------------------------------------------------------------------------------
-  vm_ssh_public_key = var.vm_ssh_public_key
-  vmss_vm_count     = 3
-  vm_sku            = "Standard_D2s_v5"
+  enable_vault_cluster_port_listener = var.enable_vault_cluster_port_listener
+  vm_ssh_public_key                  = var.vm_ssh_public_key
+  vmss_vm_count                      = 3
+  vm_sku                             = "Standard_D2s_v5"
 }
