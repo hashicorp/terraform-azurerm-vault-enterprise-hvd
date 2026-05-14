@@ -47,20 +47,20 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azurerm_dns_a_record.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/dns_a_record) | resource |
 | [azurerm_key_vault_access_policy.prereqs_kv_reader](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_lb.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb) | resource |
@@ -89,7 +89,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix for uniquely naming Azure resources. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for this Vault deployment. | `string` | n/a | yes |
 | <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the existing 'prereqs' Key Vault to use for prereqs Vault deployment, containing secrets for Vault license and TLS certs. | `string` | n/a | yes |
@@ -149,19 +149,21 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_vm_custom_image_rg_name"></a> [vm\_custom\_image\_rg\_name](#input\_vm\_custom\_image\_rg\_name) | Name of Resource Group where `vm_custom_image_name` image resides. Only valid if `vm_custom_image_name` is not `null`. | `string` | `null` | no |
 | <a name="input_vm_disk_encryption_set_name"></a> [vm\_disk\_encryption\_set\_name](#input\_vm\_disk\_encryption\_set\_name) | Name of the Disk Encryption Set to use for VMSS. | `string` | `null` | no |
 | <a name="input_vm_disk_encryption_set_rg"></a> [vm\_disk\_encryption\_set\_rg](#input\_vm\_disk\_encryption\_set\_rg) | Name of the Resource Group where the Disk Encryption Set to use for VMSS exists. | `string` | `null` | no |
-| <a name="input_vm_domain_suffix"></a> [vm\_domain\_suffix](#input\_vm\_domain\_suffix) | Domain suffix to append to VM hostnames. If not provided, VMs will use default Azure domain. This is required for cross-VNET hostname resolution for replication. | `string` | `null` | no |
+| <a name="input_vm_domain_suffix"></a> [vm\_domain\_suffix](#input\_vm\_domain\_suffix) | Domain suffix to append to VM hostnames, without a leading dot (for example, "example.com"). If not provided, VMs will use the default Azure domain. This is required for cross-VNET hostname resolution for replication. | `string` | `null` | no |
 | <a name="input_vm_enable_boot_diagnostics"></a> [vm\_enable\_boot\_diagnostics](#input\_vm\_enable\_boot\_diagnostics) | Boolean to enable boot diagnostics for VMSS. | `bool` | `false` | no |
 | <a name="input_vm_os_image"></a> [vm\_os\_image](#input\_vm\_os\_image) | The OS image to use for the VM. Options are: redhat8, redhat9, ubuntu2204, ubuntu2404. | `string` | `"ubuntu2404"` | no |
 | <a name="input_vm_sku"></a> [vm\_sku](#input\_vm\_sku) | SKU for VM size for the VMSS. | `string` | `"Standard_D2s_v5"` | no |
 | <a name="input_vm_ssh_public_key"></a> [vm\_ssh\_public\_key](#input\_vm\_ssh\_public\_key) | SSH public key for VMs in VMSS. | `string` | `null` | no |
 | <a name="input_vm_vault_data_disk_size"></a> [vm\_vault\_data\_disk\_size](#input\_vm\_vault\_data\_disk\_size) | The disk size (GB) to use to create the Vault data disk | `number` | `200` | no |
+| <a name="input_vmss_automatic_instance_repair_enabled"></a> [vmss\_automatic\_instance\_repair\_enabled](#input\_vmss\_automatic\_instance\_repair\_enabled) | Boolean to enable automatic instance repair for the VMSS. Requires `create_lb` to be `true` so the VMSS can use the Vault load balancer health probe. | `bool` | `true` | no |
+| <a name="input_vmss_automatic_instance_repair_grace_period"></a> [vmss\_automatic\_instance\_repair\_grace\_period](#input\_vmss\_automatic\_instance\_repair\_grace\_period) | Amount of time to wait after a VMSS instance state change before automatic repairs begin, expressed as an ISO 8601 duration between 30 minutes and 90 minutes. | `string` | `"PT30M"` | no |
 | <a name="input_vmss_vm_count"></a> [vmss\_vm\_count](#input\_vmss\_vm\_count) | Number of VM instances in the VMSS. | `number` | `6` | no |
 | <a name="input_worker_msi_id"></a> [worker\_msi\_id](#input\_worker\_msi\_id) | value of the worker MSI id | `string` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_load_balancer_ip"></a> [load\_balancer\_ip](#output\_load\_balancer\_ip) | IP address of load balancer's frontend configuration |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Name of the Resource Group. |
 | <a name="output_vault_cli_config"></a> [vault\_cli\_config](#output\_vault\_cli\_config) | Environment variables to configure the Vault CLI |
