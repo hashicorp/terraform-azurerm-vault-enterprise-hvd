@@ -44,7 +44,7 @@ locals {
     vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
     vault_plugin_urls                        = var.vault_plugin_urls,
     vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
-    vm_domain_suffix     = var.vm_domain_suffix != null ? var.vm_domain_suffix : "NONE"
+    vm_domain_suffix                         = var.vm_domain_suffix != null ? var.vm_domain_suffix : "NONE"
   }
 }
 
@@ -64,7 +64,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
   upgrade_mode        = "Manual"
   zone_balance        = true
   zones               = var.availability_zones
-  # health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
+  health_probe_id     = var.create_lb == true ? azurerm_lb_probe.vault[0].id : null
 
   custom_data = base64encode(templatefile("${local.custom_startup_script_template}", local.custom_data_args))
 
@@ -128,10 +128,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "vault" {
     disk_size_gb         = var.vm_vault_data_disk_size
   }
 
-  # automatic_instance_repair {
-  #   enabled      = true
-  #   grace_period = "PT15M"
-  # }
+  dynamic "automatic_instance_repair" {
+    for_each = var.vmss_automatic_instance_repair_enabled == true ? [1] : []
+
+    content {
+      enabled      = true
+      grace_period = var.vmss_automatic_instance_repair_grace_period
+    }
+  }
 
   dynamic "boot_diagnostics" {
     for_each = var.vm_enable_boot_diagnostics == true ? [1] : []

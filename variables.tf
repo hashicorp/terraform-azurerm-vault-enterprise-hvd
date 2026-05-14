@@ -367,6 +367,28 @@ variable "vmss_vm_count" {
   default     = 6
 }
 
+variable "vmss_automatic_instance_repair_enabled" {
+  type        = bool
+  description = "Boolean to enable automatic instance repair for the VMSS. Requires `create_lb` to be `true` so the VMSS can use the Vault load balancer health probe."
+  default     = true
+
+  validation {
+    condition     = var.create_lb == true || var.vmss_automatic_instance_repair_enabled == false
+    error_message = "Automatic instance repair requires `create_lb` to be `true`."
+  }
+}
+
+variable "vmss_automatic_instance_repair_grace_period" {
+  type        = string
+  description = "Amount of time to wait after a VMSS instance state change before automatic repairs begin, expressed as an ISO 8601 duration between 30 minutes and 90 minutes."
+  default     = "PT30M"
+
+  validation {
+    condition     = can(regex("^PT(3[0-9]|[4-8][0-9]|90)M$", var.vmss_automatic_instance_repair_grace_period))
+    error_message = "Automatic instance repair grace period must be an ISO 8601 duration from PT30M through PT90M."
+  }
+}
+
 variable "vm_sku" {
   type        = string
   description = "SKU for VM size for the VMSS."
