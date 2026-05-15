@@ -302,6 +302,17 @@ variable "lb_private_ip" {
   default     = null
 }
 
+variable "enable_vault_cluster_port_listener" {
+  type        = bool
+  description = "Enable the Azure Load Balancer rule on Vault cluster port 8201. When enabled, the module also creates a dedicated health probe for replication traffic. Ensure your network security rules allow 8201 from the peer cluster or other approved sources."
+  default     = false
+
+  validation {
+    condition     = !var.enable_vault_cluster_port_listener || var.create_lb
+    error_message = "enable_vault_cluster_port_listener can only be true when create_lb is true."
+  }
+}
+
 variable "vault_subnet_id" {
   type        = string
   description = "Subnet ID for Vault server VMs."
