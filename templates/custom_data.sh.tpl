@@ -18,6 +18,7 @@ VAULT_VERSION="${vault_version}"
 VERSION=$VAULT_VERSION
 REQUIRED_PACKAGES="unzip"
 ADDITIONAL_PACKAGES="${additional_package_names}"
+VAULT_CLIENT_ID="${vault_azure_client_id}"
 
 function log {
   local level="$1"
@@ -469,7 +470,7 @@ main() {
   fi
 
   log "INFO" "Running 'az login'."
-  az login --identity
+  az login --identity --client-id "$VAULT_CLIENT_ID"
 
   log "INFO" "Preparing Vault data disk"
   prepare_disk "lun0" "/opt/vault" "vault-data"
