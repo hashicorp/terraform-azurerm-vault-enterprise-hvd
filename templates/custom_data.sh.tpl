@@ -491,7 +491,8 @@ main() {
   fi
 
   log "INFO" "Running 'az login'"
-  az login --identity --client-id "$VAULT_CLIENT_ID"
+  az login --identity --client-id "$VAULT_CLIENT_ID" --allow-no-subscriptions
+
 
   log "INFO" "Preparing Vault data disk"
   prepare_disk "lun0" "/opt/vault" "vault-data"
