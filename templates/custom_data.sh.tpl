@@ -107,8 +107,29 @@ function prepare_disk() {
   log "DEBUG" "prepare_disk - device_label; $${device_label}"
 
 	sleep 20
+  # Azure presents managed data disks differently across VM families:
+  # - SCSI path: /dev/disk/azure/scsi1/lunX
+  # - NVMe path: /dev/disk/azure/data/by-lun/X
+  # Support both so cloud-init works on older and newer SKUs.
+  local lun_index="$${device_name#lun}"
+  local candidate_paths=(
+    "/dev/disk/azure/data/by-lun/$${lun_index}"
+    "/dev/disk/azure/scsi1/lun$${lun_index}"
+    "/dev/disk/azure/scsi1/$${device_name}"
+  )
+  local device_id=""
 
-  local device_id=$(readlink -f /dev/disk/azure/scsi1/$${device_name})
+  for attempt in {1..12}; do
+    for candidate in "$${candidate_paths[@]}"; do
+      if [[ -e "$${candidate}" ]]; then
+        device_id=$(readlink -f "$${candidate}")
+        if [[ -b "$${device_id}" ]]; then
+          break 2
+        fi
+      fi
+    done
+    sleep 5
+  done
   log "DEBUG" "prepare_disk - device_id; $${device_id}"
 	if [[ -z "$${device_id}" ]]; then
     log "ERROR" "No disk device found attached to device $${device_name}"
@@ -469,7 +490,7 @@ main() {
     az cloud set --name AzureUSGovernment
   fi
 
-  log "INFO" "Running 'az login'."
+  log "INFO" "Running 'az login'"
   az login --identity --client-id "$VAULT_CLIENT_ID"
 
   log "INFO" "Preparing Vault data disk"
