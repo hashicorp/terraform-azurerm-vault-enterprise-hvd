@@ -12,6 +12,7 @@ vault_fqdn            = "<vault-azwestus3.domain.tld>" # Must match TLS cert SAN
 #------------------------------------------------------------------------------
 vnet_id         = "</subscriptions/12345678-3210-abcd-01ef-abcd5678cdef4321/resourceGroups/my-rg-name/providers/Microsoft.Network/virtualNetworks/my-vnet-name>"
 vault_subnet_id = "</subscriptions/12345678-3210-abcd-01ef-abcd5678cdef4321/resourceGroups/my-rg-name/providers/Microsoft.Network/virtualNetworks/my-vnet-name/subnets/vault-subnet-name>"
+# enable_vault_cluster_port_listener = true
 
 #------------------------------------------------------------------------------
 # Azure Key Vault installation secrets and unseal key

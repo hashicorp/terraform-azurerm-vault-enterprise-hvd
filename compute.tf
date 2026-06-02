@@ -19,7 +19,8 @@ locals {
     vault_dir_logs           = var.vault_dir_logs,
     vault_user_name          = var.vault_user_name,
     vault_group_name         = var.vault_group_name,
-    additional_package_names = join(" ", var.additional_package_names)
+    additional_package_names = join(" ", var.additional_package_names),
+    vault_azure_client_id    = azurerm_user_assigned_identity.vault.client_id
 
     # installation secrets
     vault_license_keyvault_secret_id       = var.vault_license_keyvault_secret_id
@@ -44,7 +45,7 @@ locals {
     vault_seal_azurekeyvault_unseal_key_name = var.vault_seal_azurekeyvault_unseal_key_name,
     vault_plugin_urls                        = var.vault_plugin_urls,
     vault_raft_performance_multiplier        = var.vault_raft_performance_multiplier
-    vm_domain_suffix     = var.vm_domain_suffix != null ? var.vm_domain_suffix : "NONE"
+    vm_domain_suffix                         = var.vm_domain_suffix != null ? var.vm_domain_suffix : "NONE"
   }
 }
 

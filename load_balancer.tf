@@ -74,6 +74,17 @@ resource "azurerm_lb_probe" "vault" {
   interval_in_seconds = 15
 }
 
+resource "azurerm_lb_probe" "vault_cluster" {
+  count = var.create_lb == true && var.enable_vault_cluster_port_listener == true ? 1 : 0
+
+  name                = "vault-lb-cluster-probe"
+  loadbalancer_id     = azurerm_lb.vault[0].id
+  protocol            = "Https"
+  port                = var.vault_port_api
+  request_path        = "/v1/sys/health?drsecondarycode=200"
+  interval_in_seconds = 15
+}
+
 # TODO: Resolve error to support listening on both 8200 and 443
 # Load Balancing Rule Name: "sunny-vault-lb-rule-443"): performing CreateOrUpdate: unexpected status 400 (400 Bad Request) with error: RulesUseSameBackendPortProtocolAndPool: 
 # Load balancing rules /.../sunny-vault-lb-rule-8200 and /.../sunny-vault-lb-rule-443 with floating IP disabled use the same protocol Tcp and backend port 8200, and must not be used with the same backend address pool /.../sunny-vault-backend.
@@ -104,4 +115,17 @@ resource "azurerm_lb_rule" "vault_8200" {
   frontend_port                  = 8200
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.vault_servers[0].id]
   backend_port                   = 8200
+}
+
+resource "azurerm_lb_rule" "vault_8201" {
+  count = var.create_lb == true && var.enable_vault_cluster_port_listener == true ? 1 : 0
+
+  name                           = "${var.friendly_name_prefix}-vault-lb-rule-8201"
+  loadbalancer_id                = azurerm_lb.vault[0].id
+  probe_id                       = azurerm_lb_probe.vault_cluster[0].id
+  protocol                       = "Tcp"
+  frontend_ip_configuration_name = azurerm_lb.vault[0].frontend_ip_configuration[0].name
+  frontend_port                  = var.vault_port_cluster
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.vault_servers[0].id]
+  backend_port                   = var.vault_port_cluster
 }
