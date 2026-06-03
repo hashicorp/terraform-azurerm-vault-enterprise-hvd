@@ -24,19 +24,19 @@ $ terraform apply
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 3.101 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_default_example"></a> [default\_example](#module\_default\_example) | ../.. | n/a |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix for uniquely naming Azure resources. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for this Vault deployment. | `string` | n/a | yes |
 | <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the 'prereqs' Key Vault to use for prereqs Vault deployment. | `string` | n/a | yes |
@@ -109,6 +109,8 @@ $ terraform apply
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
+| <a name="output_vault_address"></a> [vault\_address](#output\_vault\_address) | HTTPS address of the Vault cluster. |
 | <a name="output_vault_cli_config"></a> [vault\_cli\_config](#output\_vault\_cli\_config) | n/a |
+| <a name="output_vault_fqdn"></a> [vault\_fqdn](#output\_vault\_fqdn) | FQDN of the Vault cluster (value for VAULT\_TLS\_SERVER\_NAME). |
 <!-- END_TF_DOCS -->
