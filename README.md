@@ -53,20 +53,20 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azurerm_dns_a_record.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/dns_a_record) | resource |
 | [azurerm_key_vault_access_policy.prereqs_kv_reader](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_lb.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb) | resource |
@@ -97,7 +97,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix for uniquely naming Azure resources. | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region for this Vault deployment. | `string` | n/a | yes |
 | <a name="input_prereqs_keyvault_name"></a> [prereqs\_keyvault\_name](#input\_prereqs\_keyvault\_name) | Name of the existing 'prereqs' Key Vault to use for prereqs Vault deployment, containing secrets for Vault license and TLS certs. | `string` | n/a | yes |
@@ -170,11 +170,13 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_load_balancer_ip"></a> [load\_balancer\_ip](#output\_load\_balancer\_ip) | IP address of load balancer's frontend configuration |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Name of the Resource Group. |
+| <a name="output_vault_address"></a> [vault\_address](#output\_vault\_address) | HTTPS address of the Vault cluster DNS name. |
 | <a name="output_vault_cli_config"></a> [vault\_cli\_config](#output\_vault\_cli\_config) | Environment variables to configure the Vault CLI |
 | <a name="output_vault_cluster_load_balancer_rule_id"></a> [vault\_cluster\_load\_balancer\_rule\_id](#output\_vault\_cluster\_load\_balancer\_rule\_id) | ID of the Vault cluster port (8201) load balancer rule. |
 | <a name="output_vault_cluster_probe_id"></a> [vault\_cluster\_probe\_id](#output\_vault\_cluster\_probe\_id) | ID of the dedicated Vault cluster port health probe. |
+| <a name="output_vault_fqdn"></a> [vault\_fqdn](#output\_vault\_fqdn) | FQDN of the Vault cluster (value for VAULT\_TLS\_SERVER\_NAME). |
 | <a name="output_vault_server_private_ips"></a> [vault\_server\_private\_ips](#output\_vault\_server\_private\_ips) | The Private IPs of the Vault servers that are spun up by VMSS |
 <!-- END_TF_DOCS -->

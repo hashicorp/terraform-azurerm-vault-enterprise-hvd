@@ -25,6 +25,7 @@ module "default_example" {
   create_resource_group = var.create_resource_group
   resource_group_name   = var.resource_group_name
   vault_fqdn            = var.vault_fqdn
+  vault_version         = var.vault_version
 
   #------------------------------------------------------------------------------
   # Networking
@@ -50,6 +51,14 @@ module "default_example" {
   #------------------------------------------------------------------------------
   enable_vault_cluster_port_listener = var.enable_vault_cluster_port_listener
   vm_ssh_public_key                  = var.vm_ssh_public_key
-  vmss_vm_count                      = 3
-  vm_sku                             = "Standard_D2s_v5"
+  vmss_vm_count                      = var.vmss_vm_count
+  vm_sku                             = var.vm_sku
+  vm_os_image                        = var.vm_os_image
+
+  #------------------------------------------------------------------------------
+  # DNS
+  #------------------------------------------------------------------------------
+  create_vault_public_dns_record = var.create_vault_public_dns_record
+  public_dns_zone_name           = var.public_dns_zone_name
+  public_dns_zone_rg             = var.public_dns_zone_rg
 }

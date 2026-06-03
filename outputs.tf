@@ -36,6 +36,16 @@ output "vault_server_private_ips" {
   value       = data.azurerm_virtual_machine_scale_set.vault.instances.*.private_ip_address
 }
 
+output "vault_address" {
+  description = "HTTPS address of the Vault cluster DNS name."
+  value       = "https://${var.vault_fqdn}:8200"
+}
+
+output "vault_fqdn" {
+  description = "FQDN of the Vault cluster (value for VAULT_TLS_SERVER_NAME)."
+  value       = var.vault_fqdn
+}
+
 output "vault_cli_config" {
   description = "Environment variables to configure the Vault CLI"
   value       = <<-EOF

@@ -89,9 +89,9 @@ function install_azcli() {
       curl -sL https://aka.ms/InstallAzureCLIDeb | bash
     elif [[ "$OS_DISTRO" == "rhel" || "$OS_DISTRO" == "centos" ]]; then
       log "INFO" "Installing Azure CLI for RHEL $OS_MAJOR_VERSION."
-			rpm --import https://packages.microsoft.com/keys/microsoft.asc
-      dnf install -y https://packages.microsoft.com/config/rhel/$OS_MAJOR_VERSION/packages-microsoft-prod.rpm
-      dnf install -y azure-cli
+      rpm --import https://packages.microsoft.com/keys/microsoft.asc
+      rpm -Uvh --quiet https://packages.microsoft.com/config/rhel/$OS_MAJOR_VERSION/packages-microsoft-prod.rpm
+      dnf install -y --disablerepo='*rhui*' --nobest azure-cli
     fi
   fi
 }
@@ -120,6 +120,7 @@ function prepare_disk() {
   local device_id=""
 
   for attempt in {1..12}; do
+    udevadm settle --timeout=5 >/dev/null 2>&1 || true
     for candidate in "$${candidate_paths[@]}"; do
       if [[ -e "$${candidate}" ]]; then
         device_id=$(readlink -f "$${candidate}")
@@ -130,6 +131,37 @@ function prepare_disk() {
     done
     sleep 5
   done
+
+  if [[ -z "$${device_id}" ]]; then
+    log "DEBUG" "prepare_disk - Azure disk symlink not found, falling back to lsblk scan."
+    # Two-pass scan:
+    #   Pass 1: first disk with no mounts AND no existing filesystem (fresh data disk).
+    #   Pass 2: first disk with no mounts but with a filesystem (handles previously-formatted
+    #           data disks; avoids selecting the OS disk which always has mounts).
+    # Root-on-LVM (common on RHEL 9) makes PKNAME lookups unreliable, so we use
+    # mountpoint presence as the only OS-disk signal.
+    local unmounted_formatted=""
+    while read -r candidate; do
+      [[ -z "$${candidate}" ]] && continue
+      # Skip any disk that has mounted filesystems (catches OS disk regardless of LVM/plain).
+      if lsblk -no MOUNTPOINT "$${candidate}" 2>/dev/null | grep -qv '^[[:space:]]*$'; then
+        continue
+      fi
+      if ! blkid "$${candidate}" &>/dev/null; then
+        # Unformatted, unmounted — ideal data disk candidate.
+        device_id="$${candidate}"
+        break
+      fi
+      # Formatted but unmounted — keep as fallback (temp disk may also match, so prefer above).
+      [[ -z "$${unmounted_formatted}" ]] && unmounted_formatted="$${candidate}"
+    done < <(lsblk -dpno NAME,TYPE | awk '$2 == "disk" { print $1 }')
+
+    # Fall back to first formatted-but-unmounted disk if no unformatted disk was found.
+    if [[ -z "$${device_id}" && -n "$${unmounted_formatted}" ]]; then
+      device_id="$${unmounted_formatted}"
+    fi
+  fi
+
   log "DEBUG" "prepare_disk - device_id; $${device_id}"
 	if [[ -z "$${device_id}" ]]; then
     log "ERROR" "No disk device found attached to device $${device_name}"
@@ -153,7 +185,7 @@ function install_packages() {
     apt-get update -y
     apt-get install -y $REQUIRED_PACKAGES $ADDITIONAL_PACKAGES
   elif [[ "$os_distro" == "centos" ]] || [[ "$os_distro" == "rhel" ]]; then
-    yum install -y $REQUIRED_PACKAGES $ADDITIONAL_PACKAGES
+    dnf install -y $REQUIRED_PACKAGES $ADDITIONAL_PACKAGES
   else
     log "ERROR" "Unable to determine package manager"
   fi
