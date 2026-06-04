@@ -21,19 +21,19 @@ Upon first deployment, Vault servers will auto-join and form a fresh cluster. Th
 
 ## Examples
 
-Example deployment scenarios can be found in the `examples` directory of this repo [here](examples/default/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
+Example deployment scenarios can be found in the `examples` directory of this repo [here](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/examples/default/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
 
 ## Deployment Options
 
-see [Deployment customizations](./docs/deployment-customizations.md)
+see [Deployment customizations](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/deployment-customizations.md)
 
 ## TLS
 
-There is a helper doc for tls cert generation should you need it [TLS](./docs/tls.md).
+There is a helper doc for tls cert generation should you need it [TLS](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/tls.md).
 
 ## Replication
 
-For cross-cluster disaster recovery or performance replication requirements, see [Replication](./docs/replication.md).
+For cross-cluster disaster recovery or performance replication requirements, see [Replication](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/replication.md).
 
 ## Load Balancing
 
