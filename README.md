@@ -21,21 +21,27 @@ Upon first deployment, Vault servers will auto-join and form a fresh cluster. Th
 
 ## Examples
 
-Example deployment scenarios can be found in the `examples` directory of this repo [here](examples/default/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
+Example deployment scenarios can be found in the `examples` directory of this repo [here](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/examples/default/README.md). These examples cover multiple capabilities of the module and are meant to serve as a starting point for operators.
 
 ## Deployment Options
 
-see [Deployment customizations](./docs/deployment-customizations.md)
+see [Deployment customizations](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/deployment-customizations.md)
 
 ## TLS
 
-There is a helper doc for tls cert generation should you need it [TLS](./docs/tls.md).
+There is a helper doc for tls cert generation should you need it [TLS](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/tls.md).
+
+## Replication
+
+For cross-cluster disaster recovery or performance replication requirements, see [Replication](https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/blob/0.2.0/docs/replication.md).
 
 ## Load Balancing
 
 This module supports the deployment of Azure's TCP Layer 4 load balancer to sit in front of the Vault cluster. The load balancer can be external (public IP) or internal (private IP) and is configured to use Vault's `sys/health` API endpoint to determine health status of Vault to ensure clients are always directed to a healthy instance when possible.
 
 The variable `lb_is_internal` is used to dictate if the load balancer should be exposed publicly. The default is `false`.
+
+Set `enable_vault_cluster_port_listener = true` to add an Azure Load Balancer rule on port `8201` for Vault cluster and disaster recovery traffic. When enabled, the module creates a dedicated `sys/health` probe for the cluster port path; any prerequisite NSGs or external network controls still need to permit `8201` from the peer cluster or other approved sources.
 
 ## Key Vault
 
@@ -66,7 +72,9 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | [azurerm_lb.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb) | resource |
 | [azurerm_lb_backend_address_pool.vault_servers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_backend_address_pool) | resource |
 | [azurerm_lb_probe.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_probe) | resource |
+| [azurerm_lb_probe.vault_cluster](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_probe) | resource |
 | [azurerm_lb_rule.vault_8200](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_rule) | resource |
+| [azurerm_lb_rule.vault_8201](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/lb_rule) | resource |
 | [azurerm_linux_virtual_machine_scale_set.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set) | resource |
 | [azurerm_private_dns_a_record.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_a_record) | resource |
 | [azurerm_private_dns_zone_virtual_network_link.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone_virtual_network_link) | resource |
@@ -113,6 +121,7 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_create_vault_private_dns_record"></a> [create\_vault\_private\_dns\_record](#input\_create\_vault\_private\_dns\_record) | Boolean to create a DNS record for Vault in a private Azure DNS zone. `private_dns_zone_name` must also be provided when `true`. | `bool` | `false` | no |
 | <a name="input_create_vault_public_dns_record"></a> [create\_vault\_public\_dns\_record](#input\_create\_vault\_public\_dns\_record) | Boolean to create a DNS record for Vault in a public Azure DNS zone. `public_dns_zone_name` must also be provided when `true`. | `bool` | `false` | no |
 | <a name="input_custom_startup_script_template"></a> [custom\_startup\_script\_template](#input\_custom\_startup\_script\_template) | Name of custom startup script template file. File must exist within a directory named `./templates` within your current working directory. | `string` | `null` | no |
+| <a name="input_enable_vault_cluster_port_listener"></a> [enable\_vault\_cluster\_port\_listener](#input\_enable\_vault\_cluster\_port\_listener) | Enable the Azure Load Balancer rule on Vault cluster port 8201. When enabled, the module also creates a dedicated health probe for replication traffic. Ensure your network security rules allow 8201 from the peer cluster or other approved sources. | `bool` | `false` | no |
 | <a name="input_is_govcloud_region"></a> [is\_govcloud\_region](#input\_is\_govcloud\_region) | Boolean indicating whether this Vault deployment is in an Azure Government Cloud region. | `bool` | `false` | no |
 | <a name="input_key_vault_cidr_allow_list"></a> [key\_vault\_cidr\_allow\_list](#input\_key\_vault\_cidr\_allow\_list) | List of CIDR blocks to allow access to the Key Vault. | `list(string)` | `[]` | no |
 | <a name="input_lb_is_internal"></a> [lb\_is\_internal](#input\_lb\_is\_internal) | Boolean to create an internal or external Azure Load Balancer for Vault. | `bool` | `false` | no |
@@ -166,6 +175,10 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | ---- | ----------- |
 | <a name="output_load_balancer_ip"></a> [load\_balancer\_ip](#output\_load\_balancer\_ip) | IP address of load balancer's frontend configuration |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Name of the Resource Group. |
+| <a name="output_vault_address"></a> [vault\_address](#output\_vault\_address) | HTTPS address of the Vault cluster DNS name. |
 | <a name="output_vault_cli_config"></a> [vault\_cli\_config](#output\_vault\_cli\_config) | Environment variables to configure the Vault CLI |
+| <a name="output_vault_cluster_load_balancer_rule_id"></a> [vault\_cluster\_load\_balancer\_rule\_id](#output\_vault\_cluster\_load\_balancer\_rule\_id) | ID of the Vault cluster port (8201) load balancer rule. |
+| <a name="output_vault_cluster_probe_id"></a> [vault\_cluster\_probe\_id](#output\_vault\_cluster\_probe\_id) | ID of the dedicated Vault cluster port health probe. |
+| <a name="output_vault_fqdn"></a> [vault\_fqdn](#output\_vault\_fqdn) | FQDN of the Vault cluster (value for VAULT\_TLS\_SERVER\_NAME). |
 | <a name="output_vault_server_private_ips"></a> [vault\_server\_private\_ips](#output\_vault\_server\_private\_ips) | The Private IPs of the Vault servers that are spun up by VMSS |
 <!-- END_TF_DOCS -->

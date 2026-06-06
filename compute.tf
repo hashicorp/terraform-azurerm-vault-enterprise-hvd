@@ -19,7 +19,8 @@ locals {
     vault_dir_logs           = var.vault_dir_logs,
     vault_user_name          = var.vault_user_name,
     vault_group_name         = var.vault_group_name,
-    additional_package_names = join(" ", var.additional_package_names)
+    additional_package_names = join(" ", var.additional_package_names),
+    vault_azure_client_id    = azurerm_user_assigned_identity.vault.client_id
 
     # installation secrets
     vault_license_keyvault_secret_id       = var.vault_license_keyvault_secret_id

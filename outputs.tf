@@ -21,9 +21,29 @@ output "load_balancer_ip" {
   description = "IP address of load balancer's frontend configuration"
 }
 
+output "vault_cluster_load_balancer_rule_id" {
+  description = "ID of the Vault cluster port (8201) load balancer rule."
+  value       = var.create_lb && var.enable_vault_cluster_port_listener ? azurerm_lb_rule.vault_8201[0].id : null
+}
+
+output "vault_cluster_probe_id" {
+  description = "ID of the dedicated Vault cluster port health probe."
+  value       = var.create_lb && var.enable_vault_cluster_port_listener ? azurerm_lb_probe.vault_cluster[0].id : null
+}
+
 output "vault_server_private_ips" {
   description = "The Private IPs of the Vault servers that are spun up by VMSS"
   value       = data.azurerm_virtual_machine_scale_set.vault.instances.*.private_ip_address
+}
+
+output "vault_address" {
+  description = "HTTPS address of the Vault cluster DNS name."
+  value       = "https://${var.vault_fqdn}:8200"
+}
+
+output "vault_fqdn" {
+  description = "FQDN of the Vault cluster (value for VAULT_TLS_SERVER_NAME)."
+  value       = var.vault_fqdn
 }
 
 output "vault_cli_config" {
