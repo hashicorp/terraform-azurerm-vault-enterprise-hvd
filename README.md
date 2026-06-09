@@ -164,6 +164,8 @@ This module requires auto-unseal and defaults to the Azure Key Vault seal mechan
 | <a name="input_vm_sku"></a> [vm\_sku](#input\_vm\_sku) | SKU for VM size for the VMSS. | `string` | `"Standard_D2s_v5"` | no |
 | <a name="input_vm_ssh_public_key"></a> [vm\_ssh\_public\_key](#input\_vm\_ssh\_public\_key) | SSH public key for VMs in VMSS. | `string` | `null` | no |
 | <a name="input_vm_vault_data_disk_size"></a> [vm\_vault\_data\_disk\_size](#input\_vm\_vault\_data\_disk\_size) | The disk size (GB) to use to create the Vault data disk | `number` | `200` | no |
+| <a name="input_vmss_automatic_instance_repair_enabled"></a> [vmss\_automatic\_instance\_repair\_enabled](#input\_vmss\_automatic\_instance\_repair\_enabled) | Boolean to enable automatic instance repair for the VMSS. Requires `create_lb` to be `true` so the VMSS can use the Vault load balancer health probe. | `bool` | `true` | no |
+| <a name="input_vmss_automatic_instance_repair_grace_period"></a> [vmss\_automatic\_instance\_repair\_grace\_period](#input\_vmss\_automatic\_instance\_repair\_grace\_period) | Amount of time to wait after a VMSS instance state change before automatic repairs begin, expressed as an ISO 8601 duration between 30 minutes and 90 minutes. | `string` | `"PT30M"` | no |
 | <a name="input_vmss_vm_count"></a> [vmss\_vm\_count](#input\_vmss\_vm\_count) | Number of VM instances in the VMSS. | `number` | `6` | no |
 | <a name="input_worker_msi_id"></a> [worker\_msi\_id](#input\_worker\_msi\_id) | value of the worker MSI id | `string` | `null` | no |
 
