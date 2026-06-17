@@ -402,8 +402,8 @@ variable "vm_os_image" {
   default     = "ubuntu2404"
 
   validation {
-    condition     = contains(["redhat8", "redhat9", "ubuntu2204", "ubuntu2404"], var.vm_os_image)
-    error_message = "Value must be one of 'redhat8', 'redhat9', 'ubuntu2204', or 'ubuntu2404'."
+    condition     = contains(["redhat8", "redhat9", "redhat10", "ubuntu2204", "ubuntu2404"], var.vm_os_image)
+    error_message = "Value must be one of 'redhat8', 'redhat9', 'redhat10', 'ubuntu2204', or 'ubuntu2404'."
   }
 }
 

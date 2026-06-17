@@ -5,6 +5,7 @@ locals {
   os_image_map = {
     redhat8    = { publisher = "RedHat", offer = "RHEL" }
     redhat9    = { publisher = "RedHat", offer = "RHEL" }
+    redhat10   = { publisher = "RedHat", offer = "RHEL" }
     ubuntu2204 = { publisher = "Canonical", offer = "0001-com-ubuntu-server-jammy" }
     ubuntu2404 = { publisher = "Canonical", offer = "ubuntu-24_04-lts" }
   }
@@ -14,6 +15,7 @@ locals {
   vm_image_sku = (
     var.vm_os_image == "redhat8" ? "810-gen2" :
     var.vm_os_image == "redhat9" ? "95_gen2" :
+    var.vm_os_image == "redhat10" ? "10-lvm-gen2" :
     var.vm_os_image == "ubuntu2204" ? "22_04-lts-gen2" :
     var.vm_os_image == "ubuntu2404" ? "ubuntu-pro" : null
   )
