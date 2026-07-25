@@ -512,6 +512,12 @@ variable "key_vault_cidr_allow_list" {
   default     = []
 }
 
+variable "use_key_vault_rbac" {
+  type        = bool
+  description = "Whether to use Azure RBAC instead of a legacy access policy for Vault's Key Vault data-plane access."
+  default     = false
+}
+
 variable "worker_msi_id" {
   type        = string
   description = "value of the worker MSI id"

@@ -17,8 +17,28 @@ resource "azurerm_role_assignment" "prereqs_kv_reader" {
   principal_id         = azurerm_user_assigned_identity.vault.principal_id
 }
 
-# Add access policy to read secrets from prereqs kv
+# Allow Vault to read secrets from the prereqs Key Vault using Azure RBAC
+resource "azurerm_role_assignment" "prereqs_kv_secrets_user" {
+  count = var.use_key_vault_rbac ? 1 : 0
+
+  scope                = data.azurerm_key_vault.prereqs.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.vault.principal_id
+}
+
+# Allow Vault to perform cryptographic operations with the unseal key using Azure RBAC
+resource "azurerm_role_assignment" "prereqs_kv_crypto_user" {
+  count = var.use_key_vault_rbac ? 1 : 0
+
+  scope                = data.azurerm_key_vault.prereqs.id
+  role_definition_name = "Key Vault Crypto User"
+  principal_id         = azurerm_user_assigned_identity.vault.principal_id
+}
+
+# Allow Vault to access secrets and the unseal key using a legacy access policy
 resource "azurerm_key_vault_access_policy" "prereqs_kv_reader" {
+  count = var.use_key_vault_rbac ? 0 : 1
+
   key_vault_id = data.azurerm_key_vault.prereqs.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.vault.principal_id
