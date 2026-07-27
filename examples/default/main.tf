@@ -38,6 +38,7 @@ module "default_example" {
   #------------------------------------------------------------------------------
   prereqs_keyvault_rg_name               = var.prereqs_keyvault_rg_name
   prereqs_keyvault_name                  = var.prereqs_keyvault_name
+  use_key_vault_rbac                     = var.use_key_vault_rbac
   vault_license_keyvault_secret_id       = var.vault_license_keyvault_secret_id
   vault_tls_cert_keyvault_secret_id      = var.vault_tls_cert_keyvault_secret_id
   vault_tls_privkey_keyvault_secret_id   = var.vault_tls_privkey_keyvault_secret_id
