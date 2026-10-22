@@ -1,3 +1,21 @@
+## v0.3.0
+
+## What's Changed
+* Release 0.2.0 by @abuxton in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/32
+* Implemented the focused VMSS health/repair change. by @tagangawilliams in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/29
+* upstream merge template repository by @github-actions[bot] in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/33
+* add redhat 10 VMSS OS by @nhsy-hcp in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/34
+* [COMPLIANCE] Add/Update Copyright Headers by @hashicorp-copywrite[bot] in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/35
+* Implemented RBAC for azure key vault operations by @tagangawilliams in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/36
+* fix: cap azurerm provider version below 5.0 to prevent breaking changes by @minsikl in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/37
+* [COMPLIANCE] Add/Update Copyright Headers by @hashicorp-copywrite[bot] in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/38
+
+## New Contributors
+* @tagangawilliams made their first contribution in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/29
+* @minsikl made their first contribution in https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/pull/37
+
+**Full Changelog**: https://github.com/hashicorp/terraform-azurerm-vault-enterprise-hvd/compare/0.2.0...0.3.0
+
 ## v0.2.0
 
 ## What's Changed
